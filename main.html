@@ -23,6 +23,8 @@ var pistol_img = new Image();
 pistol_img.src = 'Pistols.png';
 var ralfe_img = new Image();
 ralfe_img.src = 'Ralfe.png';
+var drob_img = new Image();
+drob_img.src = 'Drobash.png';
 var canvas = document.getElementById("canvas");
 context = canvas.getContext("2d");
 var k = 105;
@@ -31,12 +33,14 @@ var x_pos = 0;
 var down = false;
 var PastTime = 0;
 
+var Drob = false;
 var Ralfe = false;
 var Pistol = true;
 
 
+
 function init() {
-	alert('Смена оружия на клавиши: 1 и 2. На основной клавиатуре')
+	//alert('Смена оружия на клавиши: 1 и 2. На основной клавиатуре')
 	canvas.width = document.documentElement.clientWidth;
 	canvas.height = document.documentElement.clientHeight;
 	canvas.onmousemove = mouse_position;
@@ -87,6 +91,14 @@ function user_interface() {
 	context.strokeRect(165,5, 155, 85);
 	context.fillRect(165,5, 155, 85);
 	context.drawImage(ralfe_img, 165, 5);
+	context.closePath();
+	context.beginPath();
+	context.strokeStyle = "#1B1FFF";
+	if (Drob == true) {context.fillStyle = "#ccc";}
+	else {context.fillStyle = "#fff";}
+	context.strokeRect(325,5, 155, 85);
+	context.fillRect(325,5, 155, 85);
+	context.drawImage(drob_img, 325, 5);
 	context.closePath();
 	context.beginPath();
 	context.strokeStyle = "#1B1FFF";
@@ -174,8 +186,9 @@ function mouse_up (event) {
 }
 
 function changeWeapons(event) {
-	if (event.keyCode == 49) {Pistol = true; Ralfe = false;}
-	if (event.keyCode == 50) {Pistol = false; Ralfe = true;}
+	if (event.keyCode == 49) {Pistol = true; Ralfe = false; Drob = false;}
+	if (event.keyCode == 50) {Pistol = false; Ralfe = true; Drob = false;}
+	if (event.keyCode == 51) {Pistol = false; Ralfe = false; Drob = true;}
 }
 
 function shoot(x,y) {
@@ -206,7 +219,6 @@ function shoot(x,y) {
 
 
 function mouse_click (event) {
-	if (Pistol == true) {
 	x = 0; y = 0;
     if (document.attachEvent != null) {
         x = window.event.clientX;
@@ -215,8 +227,22 @@ function mouse_click (event) {
         x = event.clientX;
         y = event.clientY;
     }
-	shoot(x,y);
+	if (Pistol == true) {shoot(x,y);}
+	if (Drob == true) {
+	for ($i=0; $i<=9; $i++) {
+		var audioMenu = new Audio;
+		audioMenu.src = "drobovick.mp3";
+		drob_x=getRandomInt(x-60, x+60);
+		drob_y=getRandomInt(y-60, y+60);
+		shoot(drob_x, drob_y);
+		audioMenu.play();
 	}
+	}
+}
+
+function getRandomInt(min, max)
+{
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 
