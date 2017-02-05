@@ -19,17 +19,31 @@ var pic  = new Image();
 pic.src  = 'bum.png';
 var avatar = new Image();
 avatar.src = 'avatar.png';
+var pistol_img = new Image();
+pistol_img.src = 'Pistols.png';
+var ralfe_img = new Image();
+ralfe_img.src = 'Ralfe.png';
 var canvas = document.getElementById("canvas");
 context = canvas.getContext("2d");
 var k = 105;
 var scoore = 0;
 var x_pos = 0;
+var down = false;
+var PastTime = 0;
+
+var Ralfe = false;
+var Pistol = true;
+
 
 function init() {
+	alert('Смена оружия на клавиши: 1 и 2. На основной клавиатуре')
 	canvas.width = document.documentElement.clientWidth;
 	canvas.height = document.documentElement.clientHeight;
 	canvas.onmousemove = mouse_position;
+	canvas.onmousedown = mouse_down;
+	canvas.onmouseup = mouse_up;
 	canvas.onclick = mouse_click;
+	document.onkeydown = changeWeapons;
 	setInterval(play, 1000 / 50);
 }
 
@@ -60,6 +74,22 @@ user_interface();
 function user_interface() {
 	context.beginPath();
 	context.strokeStyle = "#1B1FFF";
+	if (Pistol == true) {context.fillStyle = "#ccc";}
+	else {context.fillStyle = "#fff";}
+	context.strokeRect(5,5, 155, 85);
+	context.fillRect(5,5, 155, 85);
+	context.drawImage(pistol_img, 10, 10);
+	context.closePath();
+	context.beginPath();
+	context.strokeStyle = "#1B1FFF";
+	if (Ralfe == true) {context.fillStyle = "#ccc";}
+	else {context.fillStyle = "#fff";}
+	context.strokeRect(165,5, 155, 85);
+	context.fillRect(165,5, 155, 85);
+	context.drawImage(ralfe_img, 165, 5);
+	context.closePath();
+	context.beginPath();
+	context.strokeStyle = "#1B1FFF";
 	context.fillStyle = "#1B1FFF";
 	context.arc(85, canvas.height-85, 80, 0, 2 * Math.PI);
 	context.fillRect(5,canvas.height-85, canvas.width-15, 80);
@@ -71,6 +101,7 @@ function user_interface() {
 	context.strokeText('Попал: '+Popal, 400, canvas.height-35);
 	context.strokeText('Мимо: '+Mimo, 900, canvas.height-35);
 	context.closePath();
+
 }
 
 function michen (x, y) {
@@ -105,6 +136,7 @@ function drawCursor(x, y) {
 function mouse_position(event) {
     var x = 0;
 	var y = 0;
+	var d = new Date();
     if (document.attachEvent != null) {
         x = window.event.clientX;
         y = window.event.clientY;
@@ -112,7 +144,16 @@ function mouse_position(event) {
         x = event.clientX;
         y = event.clientY;
     }
+
 	drawCursor(x, y);
+	if (down == true) {
+	if (Ralfe == true) {
+	if (d.getTime()-PastTime >= 100) {
+		shoot(x,y);
+		PastTime = d.getTime();
+	}
+	}
+	}
 	oldX = x;
 	oldY = y;
 }
@@ -123,18 +164,25 @@ function drawBum(x, y) {
 	context.closePath();
 }
 
-function mouse_click (event) {
-	//console.time('test');
+
+function mouse_down (event) {
+	down = true;
+}
+
+function mouse_up (event) {
+	down = false;
+}
+
+function changeWeapons(event) {
+	if (event.keyCode == 49) {Pistol = true; Ralfe = false;}
+	if (event.keyCode == 50) {Pistol = false; Ralfe = true;}
+}
+
+function shoot(x,y) {
 	var audioMenu = new Audio;
-	audioMenu.src = "bum.mp3";
-	x = 0; y = 0;
-    if (document.attachEvent != null) {
-        x = window.event.clientX;
-        y = window.event.clientY;
-    } else if (!document.attachEvent && document.addEventListener) {
-        x = event.clientX;
-        y = event.clientY;
-    }
+	if (Pistol == true) {audioMenu.src = "Pistol.mp3";}
+	if (Ralfe == true) {audioMenu.src = "Ralfe.mp3";}
+	drawBum(x, y);
 	xc = x_pos;
 	yc = (canvas.height/2)-50;
 	var d=Math.sqrt(Math.pow(y-yc,2)+Math.pow(x-xc, 2));
@@ -147,15 +195,28 @@ function mouse_click (event) {
 		points.push([x, y]);
 		Popal++;
 	} else {
-	if (bullets.length-1>=30) {
-	bullets.shift();
-	}
-	bullets.push([x, y]);
+		if (bullets.length-1>=30) {
+			bullets.shift();
+		}
+		bullets.push([x, y]);
 		Mimo++;
 	}
 	audioMenu.play();
+}
 
-	//console.timeEnd('test');
+
+function mouse_click (event) {
+	if (Pistol == true) {
+	x = 0; y = 0;
+    if (document.attachEvent != null) {
+        x = window.event.clientX;
+        y = window.event.clientY;
+    } else if (!document.attachEvent && document.addEventListener) {
+        x = event.clientX;
+        y = event.clientY;
+    }
+	shoot(x,y);
+	}
 }
 
 
