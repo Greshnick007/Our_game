@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>CounterStrike</title>
+	</head>
+<body>
+<canvas id="canvas">
+
+</canvas>
+<script>
+var bullets = [];
+var points = [];
+var Popal = 0;
+var Mimo = 0;
+var oldX = 0;
+var oldY = 0;
+var pic  = new Image();
+pic.src  = 'bum.png';
+var avatar = new Image();
+avatar.src = 'avatar.png';
+var canvas = document.getElementById("canvas");
+context = canvas.getContext("2d");
+var k = 105;
+var scoore = 0;
+var x_pos = 0;
+
+function init() {
+	canvas.width = document.documentElement.clientWidth;
+	canvas.height = document.documentElement.clientHeight;
+	canvas.onmousemove = mouse_position;
+	canvas.onclick = mouse_click;
+	setInterval(play, 1000 / 50);
+}
+
+function play () {
+draw ();
+drawCursor(oldX, oldY);
+}
+
+function draw() {
+context.beginPath();
+context.fillStyle = "#fff";
+context.fillRect(0, 0, canvas.width, canvas.height);
+context.closePath();
+
+	if (x_pos >= canvas.width) {x_pos =0; bullets = [];}
+	x_pos+=5;
+	michen(x_pos, (canvas.height/2)-50);
+	for (var i=0; i<=bullets.length-1; i++) {
+		drawBum(bullets[i][0], bullets[i][1]);
+	}
+	for (var i=0; i<=points.length-1; i++) {
+		points[i][0] +=5;
+		drawBum(points[i][0], points[i][1]);
+	}
+user_interface();
+}
+
+function user_interface() {
+	context.beginPath();
+	context.strokeStyle = "#1B1FFF";
+	context.fillStyle = "#1B1FFF";
+	context.arc(85, canvas.height-85, 80, 0, 2 * Math.PI);
+	context.fillRect(5,canvas.height-85, canvas.width-15, 80);
+	context.fill();
+	context.drawImage(avatar, 10, canvas.height-160);
+	context.strokeStyle = "#FFF";
+	context.font = 'bold 30px sans-serif';
+	context.strokeText(scoore, canvas.width/2, canvas.height-35);
+	context.strokeText('Попал: '+Popal, 400, canvas.height-35);
+	context.strokeText('Мимо: '+Mimo, 900, canvas.height-35);
+	context.closePath();
+}
+
+function michen (x, y) {
+	var k = 200;
+	for (var i= 0; i<=9; i++) {
+		context.beginPath();
+		context.strokeStyle ="#1B1FFF";
+		context.arc(x, y, k, 0, 2*Math.PI);
+		context.stroke();
+		context.closePath();
+		k = k - 20;
+	}
+	context.beginPath();
+	context.fillStyle ="#1B1FFF";
+	context.arc(x, y, 20, 0, 2*Math.PI);
+	context.fill();
+	context.closePath();
+}
+
+function drawCursor(x, y) {
+	context.beginPath();
+	context.strokeStyle = "#000";
+	context.arc(x, y, 16, 0, 2 * Math.PI);
+	context.moveTo(x, y-16);
+	context.lineTo(x, y+16);
+	context.moveTo(x-16, y);
+	context.lineTo(x+16, y);
+	context.stroke();
+	context.closePath();
+}
+
+function mouse_position(event) {
+    var x = 0;
+	var y = 0;
+    if (document.attachEvent != null) {
+        x = window.event.clientX;
+        y = window.event.clientY;
+    } else if (!document.attachEvent && document.addEventListener) {
+        x = event.clientX;
+        y = event.clientY;
+    }
+	drawCursor(x, y);
+	oldX = x;
+	oldY = y;
+}
+
+function drawBum(x, y) {
+	context.beginPath();
+    context.drawImage(pic, x-15, y-15);  // Рисуем изображение от точки с координатами 0, 0
+	context.closePath();
+}
+
+function mouse_click (event) {
+	//console.time('test');
+	var audioMenu = new Audio;
+	audioMenu.src = "bum.mp3";
+	x = 0; y = 0;
+    if (document.attachEvent != null) {
+        x = window.event.clientX;
+        y = window.event.clientY;
+    } else if (!document.attachEvent && document.addEventListener) {
+        x = event.clientX;
+        y = event.clientY;
+    }
+	xc = x_pos;
+	yc = (canvas.height/2)-50;
+	var d=Math.sqrt(Math.pow(y-yc,2)+Math.pow(x-xc, 2));
+	var rez = Math.ceil(d/20);
+	if (rez<=10) {
+		scoore = scoore + Math.ceil(100/rez);
+		if (points.length-1>=14) {
+			points.shift();
+		}
+		points.push([x, y]);
+		Popal++;
+	} else {
+	if (bullets.length-1>=30) {
+	bullets.shift();
+	}
+	bullets.push([x, y]);
+		Mimo++;
+	}
+	audioMenu.play();
+
+	//console.timeEnd('test');
+}
+
+
+init();
+</script>
+<style>
+body, html {
+padding : 0;
+margin : 0;
+}
+#canvas {
+cursor : none;
+}
+</style>
+</body>
+</html>
