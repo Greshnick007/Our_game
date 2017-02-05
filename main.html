@@ -40,7 +40,7 @@ var Pistol = true;
 
 
 function init() {
-	alert('Смена оружия на клавиши: 1, 2 и 3. На основной клавиатуре')
+	//alert('Смена оружия на клавиши: 1 и 2. На основной клавиатуре')
 	canvas.width = document.documentElement.clientWidth;
 	canvas.height = document.documentElement.clientHeight;
 	canvas.onmousemove = mouse_position;
@@ -54,11 +54,12 @@ function init() {
 function play () {
 draw ();
 drawCursor(oldX, oldY);
+if (down == true) {auto_shoot(oldX, oldY);}
 }
 
 function draw() {
 context.beginPath();
-context.fillStyle = "#fff";
+context.fillStyle = "#687F75";
 context.fillRect(0, 0, canvas.width, canvas.height);
 context.closePath();
 
@@ -121,7 +122,9 @@ function michen (x, y) {
 	for (var i= 0; i<=9; i++) {
 		context.beginPath();
 		context.strokeStyle ="#1B1FFF";
+		context.fillStyle ="#FFF";
 		context.arc(x, y, k, 0, 2*Math.PI);
+		context.fill();
 		context.stroke();
 		context.closePath();
 		k = k - 20;
@@ -148,7 +151,6 @@ function drawCursor(x, y) {
 function mouse_position(event) {
     var x = 0;
 	var y = 0;
-	var d = new Date();
     if (document.attachEvent != null) {
         x = window.event.clientX;
         y = window.event.clientY;
@@ -158,14 +160,6 @@ function mouse_position(event) {
     }
 
 	drawCursor(x, y);
-	if (down == true) {
-	if (Ralfe == true) {
-	if (d.getTime()-PastTime >= 100) {
-		shoot(x,y);
-		PastTime = d.getTime();
-	}
-	}
-	}
 	oldX = x;
 	oldY = y;
 }
@@ -191,6 +185,16 @@ function changeWeapons(event) {
 	if (event.keyCode == 51) {Pistol = false; Ralfe = false; Drob = true;}
 }
 
+function auto_shoot(x,y) {
+	var d = new Date();
+	if (Ralfe == true) {
+		if (d.getTime()-PastTime >= 100) {
+			shoot(x,y);
+			PastTime = d.getTime();
+		}
+	}
+}
+
 function shoot(x,y) {
 	var audioMenu = new Audio;
 	if (Pistol == true) {audioMenu.src = "Pistol.mp3";}
@@ -202,7 +206,7 @@ function shoot(x,y) {
 	var rez = Math.ceil(d/20);
 	if (rez<=10) {
 		scoore = scoore + Math.ceil(100/rez);
-		if (points.length-1>=14) {
+		if (points.length-1>=29) {
 			points.shift();
 		}
 		points.push([x, y]);
