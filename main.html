@@ -209,7 +209,7 @@ function shoot(x,y) {
 		if (points.length-1>=29) {
 			points.shift();
 		}
-		points.push([x, y]);
+		points.push([x, y-Math.sin(x_pos/100)*100]);
 		Popal++;
 	} else {
 		if (bullets.length-1>=30) {
