@@ -65,10 +65,10 @@ context.closePath();
 
 	if (x_pos >= canvas.width) {x_pos =0; bullets = [];}
 	x_pos+=5;
+    for (var i=0; i<=bullets.length-1; i++) {
+        drawBum(bullets[i][0], bullets[i][1]);
+    }
 	michen(x_pos, (canvas.height/2)-50+Math.sin(x_pos/100)*100);
-	for (var i=0; i<=bullets.length-1; i++) {
-		drawBum(bullets[i][0], bullets[i][1]);
-	}
 	for (var i=0; i<=points.length-1; i++) {
 		points[i][0] +=5;
 		drawBum(points[i][0], points[i][1]+Math.sin(x_pos/100)*100);
