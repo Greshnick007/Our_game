@@ -33,9 +33,19 @@ var PastTime = 0;
  * Класс оружия
 */
 class Weapon {
-    constructor(imageSource) {
+    constructor(imageSource, soundSource) {
         this.setImage(imageSource); // Изображение оружия
+        this.setSound(soundSource); // Звук оружия
         this.isActive = false; // Является выбранным?
+    }
+
+    setSound(arg) {
+        this.audio = new Audio();
+        this.audio.src = arg;
+    }
+
+    playSound() {
+        this.audio.play();
     }
 
     setImage(arg) {
@@ -96,20 +106,13 @@ class Statistic {
     }
 }
 
-var pistol_img = new Image();
-pistol_img.src = 'Pistols.png';
-var ralfe_img = new Image();
-ralfe_img.src = 'Ralfe.png';
-var drob_img = new Image();
-drob_img.src = 'Drobash.png';
-var Drob = false;
-var Ralfe = false;
-var Pistol = true;
+
 let stat = new Statistic();
+
 let weapons = [];
-weapons.push(new Weapon('Pistols.png'));
-weapons.push(new Weapon('Ralfe.png'));
-weapons.push(new Weapon('Drobash.png'));
+weapons.push(new Weapon('Pistols.png', 'Pistol.mp3'));
+weapons.push(new Weapon('Ralfe.png', 'Ralfe.mp3'));
+weapons.push(new Weapon('Drobash.png', 'Drobovick.mp3'));
 weapons[0].setIsActive(true);
 
 
