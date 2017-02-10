@@ -11,8 +11,8 @@
 <script>
 var bullets = [];
 var points = [];
-var Popal = 0;
-var Mimo = 0;
+
+
 var oldX = 0;
 var oldY = 0;
 var pic  = new Image();
@@ -28,7 +28,7 @@ drob_img.src = 'Drobash.png';
 var canvas = document.getElementById("canvas");
 context = canvas.getContext("2d");
 var k = 105;
-var scoore = 0;
+
 var x_pos = 0;
 var down = false;
 var PastTime = 0;
@@ -36,6 +36,49 @@ var PastTime = 0;
 var Drob = false;
 var Ralfe = false;
 var Pistol = true;
+
+/*
+ * Класс для хранения данных о статистике
+ */
+class Statistic {
+
+    constructor() {
+        this.hits = 0; // Попадания
+        this.missed = 0; // Мимо
+        this.score = 0; // Текущие очки
+    }
+
+    addScore(arg) {
+        this.score += arg;
+    }
+
+    addMissed(arg) {
+        this.missed += arg;
+    }
+
+    addHits(arg) {
+        this.hits += arg;
+    }
+
+    getScore(){
+        return this.score;
+    }
+
+    getHits(){
+        return this.hits;
+    }
+
+    getMissed(){
+        return this.missed;
+    }
+
+    clearStat() {
+        constructor();
+    }
+}
+
+let stat = new Statistic();
+
 
 
 
@@ -110,9 +153,9 @@ function user_interface() {
 	context.drawImage(avatar, 10, canvas.height-160);
 	context.strokeStyle = "#FFF";
 	context.font = 'bold 30px sans-serif';
-	context.strokeText(scoore, canvas.width/2, canvas.height-35);
-	context.strokeText('Попал: '+Popal, 400, canvas.height-35);
-	context.strokeText('Мимо: '+Mimo, 900, canvas.height-35);
+	context.strokeText(stat.getScore(), canvas.width/2, canvas.height-35);
+	context.strokeText('Попал: '+stat.getHits(), 400, canvas.height-35);
+	context.strokeText('Мимо: '+stat.getMissed(), 900, canvas.height-35);
 	context.closePath();
 
 }
@@ -204,19 +247,24 @@ function shoot(x,y) {
 	yc = (canvas.height/2)-50;
 	var d=Math.sqrt(Math.pow(y-yc,2)+Math.pow(x-xc, 2));
 	var rez = Math.ceil(d/20);
+
 	if (rez<=10) {
-		scoore = scoore + Math.ceil(100/rez);
+
+		stat.addScore( Math.ceil(100/rez) );
+        stat.addHits(1);
+
 		if (points.length-1>=29) {
 			points.shift();
 		}
 		points.push([x, y-Math.sin(x_pos/100)*100]);
-		Popal++;
 	} else {
+	    stat.addMissed(1);
+
 		if (bullets.length-1>=30) {
 			bullets.shift();
 		}
+
 		bullets.push([x, y]);
-		Mimo++;
 	}
 	audioMenu.play();
 }
