@@ -19,12 +19,6 @@ var pic  = new Image();
 pic.src  = 'bum.png';
 var avatar = new Image();
 avatar.src = 'avatar.png';
-var pistol_img = new Image();
-pistol_img.src = 'Pistols.png';
-var ralfe_img = new Image();
-ralfe_img.src = 'Ralfe.png';
-var drob_img = new Image();
-drob_img.src = 'Drobash.png';
 var canvas = document.getElementById("canvas");
 context = canvas.getContext("2d");
 var k = 105;
@@ -33,9 +27,34 @@ var x_pos = 0;
 var down = false;
 var PastTime = 0;
 
-var Drob = false;
-var Ralfe = false;
-var Pistol = true;
+
+
+/*
+ * Класс оружия
+*/
+class Weapon {
+    constructor(imageSource) {
+        this.setImage(imageSource); // Изображение оружия
+        this.isActive = false; // Является выбранным?
+    }
+
+    setImage(arg) {
+        this.image = new Image();
+        this.image.src = arg;
+    }
+
+    getImage() {
+        return this.image;
+    }
+
+    setIsActive(arg) {
+        this.isActive = arg;
+    }
+
+    getIsActive() {
+        return this.isActive;
+    }
+}
 
 /*
  * Класс для хранения данных о статистике
@@ -77,9 +96,21 @@ class Statistic {
     }
 }
 
+var pistol_img = new Image();
+pistol_img.src = 'Pistols.png';
+var ralfe_img = new Image();
+ralfe_img.src = 'Ralfe.png';
+var drob_img = new Image();
+drob_img.src = 'Drobash.png';
+var Drob = false;
+var Ralfe = false;
+var Pistol = true;
 let stat = new Statistic();
-
-
+let weapons = [];
+weapons.push(new Weapon('Pistols.png'));
+weapons.push(new Weapon('Ralfe.png'));
+weapons.push(new Weapon('Drobash.png'));
+weapons[0].setIsActive(true);
 
 
 function init() {
@@ -120,30 +151,18 @@ user_interface();
 }
 
 function user_interface() {
-	context.beginPath();
-	context.strokeStyle = "#1B1FFF";
-	if (Pistol == true) {context.fillStyle = "#ccc";}
-	else {context.fillStyle = "#fff";}
-	context.strokeRect(5,5, 155, 85);
-	context.fillRect(5,5, 155, 85);
-	context.drawImage(pistol_img, 10, 10);
-	context.closePath();
-	context.beginPath();
-	context.strokeStyle = "#1B1FFF";
-	if (Ralfe == true) {context.fillStyle = "#ccc";}
-	else {context.fillStyle = "#fff";}
-	context.strokeRect(165,5, 155, 85);
-	context.fillRect(165,5, 155, 85);
-	context.drawImage(ralfe_img, 165, 5);
-	context.closePath();
-	context.beginPath();
-	context.strokeStyle = "#1B1FFF";
-	if (Drob == true) {context.fillStyle = "#ccc";}
-	else {context.fillStyle = "#fff";}
-	context.strokeRect(325,5, 155, 85);
-	context.fillRect(325,5, 155, 85);
-	context.drawImage(drob_img, 325, 5);
-	context.closePath();
+
+    weapons.forEach(function(weapon, i, arr) {
+        context.beginPath();
+        context.strokeStyle = "#1B1FFF";
+        if (weapon.getIsActive() === true) {context.fillStyle = "#ccc";}
+        else {context.fillStyle = "#fff";}
+        context.strokeRect(5+(165*i),5, 155, 85);
+        context.fillRect(5+(165*i),5, 155, 85);
+        context.drawImage(weapon.getImage(), 10+(165*i), 10);
+        context.closePath();
+    }); // Рендерим оружие
+
 	context.beginPath();
 	context.strokeStyle = "#1B1FFF";
 	context.fillStyle = "#1B1FFF";
@@ -223,9 +242,10 @@ function mouse_up (event) {
 }
 
 function changeWeapons(event) {
-	if (event.keyCode == 49) {Pistol = true; Ralfe = false; Drob = false;}
-	if (event.keyCode == 50) {Pistol = false; Ralfe = true; Drob = false;}
-	if (event.keyCode == 51) {Pistol = false; Ralfe = false; Drob = true;}
+    weapons.forEach(function(weapon, i, list) {
+        weapon.setIsActive(false)
+    });
+    weapons[event.keyCode - 49].setIsActive(true);
 }
 
 function auto_shoot(x,y) {
