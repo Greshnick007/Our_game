@@ -33,10 +33,19 @@ var PastTime = 0;
  * Класс оружия
 */
 class Weapon {
-    constructor(imageSource, soundSource) {
+    constructor(imageSource, soundSource, speedShoot) {
         this.setImage(imageSource); // Изображение оружия
         this.setSound(soundSource); // Звук оружия
         this.isActive = false; // Является выбранным?
+        this.setSpeedShoot(speedShoot); // Скорострельность
+    }
+
+    setSpeedShoot(arg) {
+        this.speedShot = arg;
+    }
+
+    getSpeedShoot(arg) {
+        return this.speedShot;
     }
 
     setSound(arg) {
@@ -68,15 +77,21 @@ class Weapon {
 }
 
 class Pistol extends Weapon {
-
+    constructor() {
+        super('Pistols.png', 'Pistol.mp3', 2);
+    }
 }
 
 class Rifle extends Weapon {
-
+    constructor() {
+        super('Ralfe.png', 'Ralfe.mp3', 5);
+    }
 }
 
 class Shotgun extends Weapon {
-
+    constructor() {
+        super('Drobash.png', 'Drobovick.mp3', 1);
+    }
 }
 
 /*
@@ -123,9 +138,9 @@ class Statistic {
 let stat = new Statistic();
 
 let weapons = [];
-weapons.push(new Pistol('Pistols.png', 'Pistol.mp3'));
-weapons.push(new Rifle('Ralfe.png', 'Ralfe.mp3'));
-weapons.push(new Shotgun('Drobash.png', 'Drobovick.mp3'));
+weapons.push(new Pistol());
+weapons.push(new Rifle());
+weapons.push(new Shotgun());
 weapons[0].setIsActive(true);
 
 
@@ -136,15 +151,17 @@ function init() {
 	canvas.onmousemove = mouse_position;
 	canvas.onmousedown = mouse_down;
 	canvas.onmouseup = mouse_up;
-	canvas.onclick = mouse_click;
+	//canvas.onclick = mouse_click;
 	document.onkeydown = changeWeapons;
 	setInterval(play, 1000 / 50);
 }
 
 function play () {
-draw ();
-drawCursor(oldX, oldY);
-if (down == true) {auto_shoot(oldX, oldY);}
+    draw ();
+    drawCursor(oldX, oldY);
+    if (down == true) {
+        shooting(oldX, oldY);
+    }
 }
 
 function draw() {
@@ -262,6 +279,18 @@ function changeWeapons(event) {
         weapon.setIsActive(false)
     });
     weapons[event.keyCode - 49].setIsActive(true);
+}
+
+function shooting(x, y) {
+    var d = new Date();
+    weapons.forEach(function (weapon, i, arr) {
+        if(weapon.getIsActive()) {
+            if (d.getTime()-PastTime >= 1000/weapon.getSpeedShoot()) {
+                shoot(x,y);
+                PastTime = d.getTime();
+            }
+        }
+    });
 }
 
 function auto_shoot(x,y) {
