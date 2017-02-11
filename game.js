@@ -76,7 +76,11 @@ class Enemy {
     }
 
     draw() {
-        this.go();
+        this.go(); // Двигаем врага
+
+        /*
+         * Нарисуйте врага здесь
+         */
         context.beginPath();
         context.fillStyle = this.colorBody;
         context.fillRect(this.x, this.y, 50, 50);
@@ -84,6 +88,7 @@ class Enemy {
         context.fillRect(this.x+5, this.y+10, 15, 15);
         context.fillRect(this.x+25, this.y+10, 15, 15);
         context.closePath();
+        ///////
     }
 
     go() {
@@ -93,8 +98,8 @@ class Enemy {
             this.y += getRandomInt(-10,10);
             if(this.y < 200) this.y = 200;
             if(this.y > canvas.height-200) this.y = canvas.height-200;
+            if(this.x > canvas.width - 300) this.x = canvas.width - 300;
             this.pastTime = this.date.getTime();
-
         }
     }
 
@@ -108,8 +113,8 @@ class Enemy {
         return false;
     }
 
-    isGone() {
-        if(this.x >= canvas.width) {
+    isBite() {
+        if(this.x > canvas.width - 400) {
             return true;
         }
         return false;
@@ -119,6 +124,42 @@ class Enemy {
 class Player {
     constructor() {
         this.stat = new Statistic();
+        this.health = 100;
+        this.maxHealth = 100;
+        this.x = canvas.width - 200;
+        this.y = canvas.height/2;
+    }
+
+    draw() {
+        context.beginPath();
+        context.strokeStyle = "#FFF";
+        context.font = 'bold 30px sans-serif';
+        context.strokeText(this.health+'/'+this.maxHealth, this.x, this.y+200);
+        context.closePath();
+        /*
+         * Нарисуйте игрока здесь
+         */
+
+        context.beginPath();
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(this.x, this.y, 50, 50); //Голова
+        context.fillStyle = "#000";
+        context.fillRect(this.x+5, this.y+10, 15, 15); // Левый глаз
+        context.fillRect(this.x+25, this.y+10, 15, 15); // Правый глаз
+        context.fillStyle = "#88FF22";
+        context.fillRect(this.x+10, this.y+50, 30, 70);
+        context.fillStyle = "#225F22";
+        context.fillRect(this.x-20, this.y+70, 20, 20);
+        context.fillRect(this.x+10, this.y+70, 20, 20);
+        context.fillStyle = "#000";
+        context.fillRect(this.x-40, this.y+60, 100, 15);
+        context.closePath();
+
+        ///////
+    }
+
+    getHirt(arg) {
+        this.health -= arg;
     }
 }
 
@@ -136,7 +177,7 @@ let bullets = [],
     stat = new Statistic(),
     weapons = [],
     enemies = [],
-    player = new Player();
+    player;
 
 /*
  * Инициализация
@@ -155,6 +196,7 @@ function init() {
     canvas.onmousedown = mouse_down;
     canvas.onmouseup = mouse_up;
     document.onkeydown = changeWeapons;
+    player = new Player();
     setInterval(play, 1000 / 50);
     setInterval(createEnemy, 1000);
 }
@@ -162,9 +204,8 @@ function init() {
 function createEnemy() {
     enemies.push(new Enemy());
     enemies.forEach(function(enemy, i){
-        if(enemy.isGone()) {
-            player.stat.addMoney(-5000);
-            enemies.splice(i, 1); // Ушел за экран - удаляе и отнимаем очки
+        if(enemy.isBite()) {
+            player.getHirt(1);
         }
     });
 }
@@ -202,6 +243,7 @@ function draw() {
         drawBum(bullets[i][0], bullets[i][1]);
     }
     user_interface();
+    player.draw();
 }
 
 /*
