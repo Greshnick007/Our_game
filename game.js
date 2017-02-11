@@ -8,25 +8,9 @@ class Weapon {
         this.setImage(imageSource); // Изображение оружия
         this.setSound(soundSource); // Звук оружия
         this.isActive = false; // Является выбранным?
-        this.setSpeedShoot(speedShoot); // Скорострельность
-        this.setRazbros(razbros); // Разброс
+        this.speedShot = speedShoot; // Скорострельность
+        this.razbros = razbros; // Разброс
         this.strikesPerShoot = strikesPerShoot; // Количество пуль за выстрел
-    }
-
-    setRazbros(arg) {
-        this.razbros = arg;
-    }
-
-    getRazbros() {
-        return this.razbros;
-    }
-
-    setSpeedShoot(arg) {
-        this.speedShot = arg;
-    }
-
-    getSpeedShoot() {
-        return this.speedShot;
     }
 
     setSound(arg) {
@@ -61,29 +45,11 @@ class Weapon {
         let i;
         for(i = 0; i<this.strikesPerShoot; ++i) {
             array.push([
-                x + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2),
-                y + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2)
+                x + getRandomInt(0 -  this.razbros/2, this.razbros/2),
+                y + getRandomInt(0 -  this.razbros/2, this.razbros/2)
             ]);
         }
         return array;
-    }
-}
-
-class Pistol extends Weapon {
-    constructor() {
-        super('img/Pistols.png', 'sounds/Pistol.mp3', 2, 80, 1);
-    }
-}
-
-class Rifle extends Weapon {
-    constructor() {
-        super('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 160, 1);
-    }
-}
-
-class Shotgun extends Weapon {
-    constructor() {
-        super('img/Drobash.png', 'sounds/Drobovick.mp3', 1, 240, 10);
     }
 }
 
@@ -142,9 +108,9 @@ let bullets = [],
  */
 
 function init() {
-    weapons.push(new Pistol());
-    weapons.push(new Shotgun());
-    weapons.push(new Rifle());
+    weapons.push(new Weapon('img/Pistols.png', 'sounds/Pistol.mp3', 2, 80, 1));
+    weapons.push(new Weapon('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 160, 1));
+    weapons.push(new Weapon('img/Drobash.png', 'sounds/Drobovick.mp3', 1, 240, 10));
     weapons[0].setIsActive(true);
     pic.src  = 'img/bum.png';
     avatar.src = 'img/avatar.png';
@@ -341,7 +307,7 @@ function shooting(x, y) {
     var d = new Date();
     weapons.forEach(function (weapon, i, arr) {
         if(weapon.getIsActive()) {
-            if (d.getTime()-PastTime >= 1000/weapon.getSpeedShoot()) { // Ограничиваем скорострельность
+            if (d.getTime()-PastTime >= 1000/weapon.speedShot) { // Ограничиваем скорострельность
                 weapon.playSound();
                 shoot(weapon.strikes(x,y)); // Посылаем в обработчик массив произведенных выстрелов оружием
                 PastTime = d.getTime();
