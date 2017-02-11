@@ -71,14 +71,16 @@ class Enemy {
         this.y = canvas.height/2 + getRandomInt(-200, 200);
         this.date = new Date();
         this.pastTime = this.date.getTime();
+        this.colorBody = getRandomColor();
+        this.colorEye = getRandomColor();
     }
 
     draw() {
         this.go();
         context.beginPath();
-        context.fillStyle = "#00F0FF";
+        context.fillStyle = this.colorBody;
         context.fillRect(this.x, this.y, 50, 50);
-        context.fillStyle = "#0000FF";
+        context.fillStyle = this.colorEye;
         context.fillRect(this.x+5, this.y+10, 15, 15);
         context.fillRect(this.x+25, this.y+10, 15, 15);
         context.closePath();
@@ -87,11 +89,12 @@ class Enemy {
     go() {
         this.date = new Date();
         if (this.date.getTime()-this.pastTime >= 500) {
-            this.x += 5;
+            this.x += 50;
             this.y += getRandomInt(-10,10);
             if(this.y < 200) this.y = 200;
             if(this.y > canvas.height-200) this.y = canvas.height-200;
             this.pastTime = this.date.getTime();
+
         }
     }
 
@@ -102,6 +105,13 @@ class Enemy {
             }
         }
 
+        return false;
+    }
+
+    isGone() {
+        if(this.x >= canvas.width) {
+            return true;
+        }
         return false;
     }
 }
@@ -130,7 +140,6 @@ function init() {
     weapons.push(new Weapon('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 160, 1));
     weapons.push(new Weapon('img/Drobash.png', 'sounds/Drobovick.mp3', 1, 240, 10));
     weapons[0].isActive = true;
-    enemies.push(new Enemy());
     pic.src  = 'img/bum.png';
     avatar.src = 'img/avatar.png';
     canvas.width = document.documentElement.clientWidth;
@@ -145,6 +154,12 @@ function init() {
 
 function createEnemy() {
     enemies.push(new Enemy());
+    enemies.forEach(function(enemy, i){
+        if(enemy.isGone()) {
+            stat.addScore(-5000);
+            enemies.splice(i, 1); // Ушел за экран - удаляе и отнимаем очки
+        }
+    });
 }
 
 /*
@@ -173,19 +188,11 @@ function draw() {
         enemy.draw();
     });
 
-    if (x_pos >= canvas.width) {
-        x_pos =0;
-        bullets = [];
-        points = [];
+    if(bullets.length > 20) {
+        bullets.shift();
     }
-    x_pos+=5;
     for (let i=0; i<=bullets.length-1; i++) {
         drawBum(bullets[i][0], bullets[i][1]);
-    }
-    michen(x_pos, (canvas.height/2)-50+Math.sin(x_pos/100)*100);
-    for (let i=0; i<=points.length-1; i++) {
-        points[i][0] +=5;
-        drawBum(points[i][0], points[i][1]+Math.sin(x_pos/100)*100);
     }
     user_interface();
 }
@@ -357,28 +364,17 @@ function shooting(x, y) {
 
 function shoot(strikes) {
     strikes.forEach(function (coords) {
-        drawBum(coords[0], coords[1]); // Рисуем отверстие
-        let xc = x_pos;
-        let yc = (canvas.height/2)-50;
-        let d=Math.sqrt(Math.pow(coords[1]-yc,2)+Math.pow(coords[0]-xc, 2));
-        let rez = Math.ceil(d/20);
 
-        if (rez<=10) {
-            stat.addScore( Math.ceil(100/rez) ); // Добавляем очки
-            stat.addHits(1); // ...и попадания
-            points.push([coords[0], coords[1]-Math.sin(x_pos/100)*100]);
-        } else {
-            stat.addMissed(1); // Добавляем промах
-            bullets.push([coords[0], coords[1]]);
-        }
+        drawBum(coords[0], coords[1]); // Рисуем отверстие
+        stat.addMissed(1); // Добавляем промах
+        bullets.push([coords[0], coords[1]]); // Добавляем отверстие
+
         enemies.forEach(function(enemy, i, arr){
             if(enemy.isHit(coords[0], coords[1])) {
                 stat.addHits(1);
                 stat.addScore(100);
-                enemies.splice(i, 1);
-                enemies.push(new Enemy());
+                enemies.splice(i, 1); // Убит - удаляем и добавляем очки
             }
-
         });
     });
 
@@ -394,6 +390,10 @@ function shoot(strikes) {
 function getRandomInt(min, max)
 {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomColor() {
+    return '#' + getRandomInt(0, 9) + getRandomInt(0, 9) + getRandomInt(0, 9);
 }
 
 init();
