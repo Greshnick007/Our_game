@@ -49,11 +49,11 @@ class Statistic {
     constructor() {
         this.hits = 0; // Попадания
         this.missed = 0; // Мимо
-        this.score = 0; // Текущие очки
+        this.money = 0; // Текущие очки
     }
 
-    addScore(arg) {
-        this.score += arg;
+    addMoney(arg) {
+        this.money += arg;
     }
 
     addMissed(arg) {
@@ -116,6 +116,12 @@ class Enemy {
     }
 }
 
+class Player {
+    constructor() {
+        this.stat = new Statistic();
+    }
+}
+
 let bullets = [],
     points = [],
     oldX = 0,
@@ -129,7 +135,8 @@ let bullets = [],
     context = canvas.getContext("2d"),
     stat = new Statistic(),
     weapons = [],
-    enemies = [];
+    enemies = [],
+    player = new Player();
 
 /*
  * Инициализация
@@ -156,7 +163,7 @@ function createEnemy() {
     enemies.push(new Enemy());
     enemies.forEach(function(enemy, i){
         if(enemy.isGone()) {
-            stat.addScore(-5000);
+            player.stat.addMoney(-5000);
             enemies.splice(i, 1); // Ушел за экран - удаляе и отнимаем очки
         }
     });
@@ -228,34 +235,9 @@ function user_interface() {
     context.drawImage(avatar, 10, canvas.height-160);
     context.strokeStyle = "#FFF";
     context.font = 'bold 30px sans-serif';
-    context.strokeText(stat.score, canvas.width/2, canvas.height-35);
-    context.strokeText('Попал: '+stat.hits, 400, canvas.height-35);
-    context.strokeText('Мимо: '+stat.missed, 900, canvas.height-35);
-    context.closePath();
-}
-
-/*
- * Отрисовка мишени
- * @param Integer x - координата x
- * @param Integer y - координата y
- */
-
-function michen (x, y) {
-    var k = 200;
-    for (var i= 0; i<=9; i++) {
-        context.beginPath();
-        context.strokeStyle ="#1B1FFF";
-        context.fillStyle ="#FFF";
-        context.arc(x, y, k, 0, 2*Math.PI);
-        context.fill();
-        context.stroke();
-        context.closePath();
-        k = k - 20;
-    }
-    context.beginPath();
-    context.fillStyle ="#1B1FFF";
-    context.arc(x, y, 20, 0, 2*Math.PI);
-    context.fill();
+    context.strokeText(player.stat.money+'$', canvas.width/2, canvas.height-35);
+    context.strokeText('Убито: '+player.stat.hits, 400, canvas.height-35);
+    context.strokeText('Мимо: '+player.stat.missed, 900, canvas.height-35);
     context.closePath();
 }
 
@@ -366,13 +348,13 @@ function shoot(strikes) {
     strikes.forEach(function (coords) {
 
         drawBum(coords[0], coords[1]); // Рисуем отверстие
-        stat.addMissed(1); // Добавляем промах
+        player.stat.addMissed(1); // Добавляем промах
         bullets.push([coords[0], coords[1]]); // Добавляем отверстие
 
         enemies.forEach(function(enemy, i, arr){
             if(enemy.isHit(coords[0], coords[1])) {
-                stat.addHits(1);
-                stat.addScore(100);
+                player.stat.addHits(1);
+                player.stat.addMoney(100);
                 enemies.splice(i, 1); // Убит - удаляем и добавляем очки
             }
         });
