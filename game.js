@@ -246,18 +246,25 @@ function draw() {
     context.beginPath();
     context.fillStyle = "#687F75";
     context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#333";
+    context.fillRect(0, 0, canvas.width, 100);
     context.closePath();
 
+    // Удаляем старые метки от пуль
+    if(bullets.length > 20) {
+        bullets.shift();
+    }
+
+    // Отрисовывка пуль
+    for (let i=0; i<=bullets.length-1; i++) {
+        drawBum(bullets[i][0], bullets[i][1]);
+    }
+
+    // Отрисовка врагов
     enemies.forEach(function (enemy) {
         enemy.draw();
     });
 
-    if(bullets.length > 20) {
-        bullets.shift();
-    }
-    for (let i=0; i<=bullets.length-1; i++) {
-        drawBum(bullets[i][0], bullets[i][1]);
-    }
     user_interface();
     player.draw();
 }
