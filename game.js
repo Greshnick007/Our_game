@@ -119,12 +119,13 @@ class Enemy {
 
     // Может ли укусить игрока
     isBite() {
-        if(this.x > canvas.width - 400) {
-            return true;
-        }
-        return false;
+        return this.x > (canvas.width - 400);
     }
 }
+
+/*
+ * Класс игрока
+ */
 
 class Player {
     constructor() {
@@ -134,6 +135,10 @@ class Player {
         this.x = canvas.width - 200; // Положение на холсте
         this.y = canvas.height/2;
     }
+
+    /*
+     * Отрисовка игрока
+     */
 
     draw() {
         context.beginPath();
@@ -162,8 +167,17 @@ class Player {
         ///////
     }
 
+    /*
+     * Нанесение урона
+     */
+
     getHirt(arg) {
         this.health -= arg;
+        if(this.health < 0) { // Умерли
+            clearInterval(intervalsID[0]);
+            clearInterval(intervalsID[0]); // ...останавливаем рендеринг и генерацию врагов
+            lose(); // Очищаем канвас и уведомляем о проигрыше
+        }
     }
 }
 
@@ -178,7 +192,8 @@ let bullets = [],
     context = canvas.getContext("2d"),
     weapons = [],
     enemies = [],
-    player;
+    player,
+    intervalsID = [];
 
 /*
  * Инициализация
@@ -198,8 +213,8 @@ function init() {
     canvas.onmouseup = mouse_up;
     document.onkeydown = changeWeapons;
     player = new Player();
-    setInterval(play, 1000 / 50);
-    setInterval(createEnemy, 1000);
+    intervalsID.push(setInterval(play, 1000 / 50));
+    intervalsID.push(setInterval(createEnemy, 1000));
 }
 
 function createEnemy() {
@@ -231,18 +246,25 @@ function draw() {
     context.beginPath();
     context.fillStyle = "#687F75";
     context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#333";
+    context.fillRect(0, 0, canvas.width, 100);
     context.closePath();
 
+    // Удаляем старые метки от пуль
+    if(bullets.length > 20) {
+        bullets.shift();
+    }
+
+    // Отрисовывка пуль
+    for (let i=0; i<=bullets.length-1; i++) {
+        drawBum(bullets[i][0], bullets[i][1]);
+    }
+
+    // Отрисовка врагов
     enemies.forEach(function (enemy) {
         enemy.draw();
     });
 
-    if(bullets.length > 20) {
-        bullets.shift();
-    }
-    for (let i=0; i<=bullets.length-1; i++) {
-        drawBum(bullets[i][0], bullets[i][1]);
-    }
     user_interface();
     player.draw();
 }
@@ -333,7 +355,9 @@ function mouse_position(event) {
 
 function drawBum(x, y) {
     context.beginPath();
-    context.drawImage(pic, x-15, y-15);
+    context.fillStyle = "#335544";
+    context.arc(x, y, 2, 0, 2 * Math.PI);
+    context.fill();
     context.closePath();
 }
 
@@ -356,10 +380,12 @@ function mouse_up () {
  */
 
 function changeWeapons(event) {
-    weapons.forEach(function(weapon) {
-        weapon.isActive = false;
-    });
-    weapons[event.keyCode - 49].isActive = true;
+    if(event.keyCode >= 49 && event.keyCode <= 49 + weapons.length-1) {
+        weapons.forEach(function(weapon) {
+            weapon.isActive = false;
+        });
+        weapons[event.keyCode - 49].isActive = true;
+    }
 }
 
 /*
@@ -417,8 +443,26 @@ function getRandomInt(min, max)
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/*
+ * Получение псевдослучайного цвета
+ * @return String - случайный цвет в HEX
+ */
+
 function getRandomColor() {
     return '#' + getRandomInt(0, 9) + getRandomInt(0, 9) + getRandomInt(0, 9);
+}
+
+/*
+ * Закрашивание экрана и сообщение о проигрыше
+ */
+
+function lose() {
+    context.beginPath();
+    context.fillStyle = "#687F75";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#FFF";
+    context.strokeText('Вы проиграли!', canvas.width/2, canvas.height/2);
+    context.closePath();
 }
 
 init();
