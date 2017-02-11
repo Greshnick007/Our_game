@@ -1,19 +1,4 @@
-let bullets = [],
-    points = [],
-    oldX = 0,
-    oldY = 0,
-    x_pos = 0,
-    down = false,
-    PastTime = 0;
-
-let pic  = new Image();
-pic.src  = 'img/bum.png';
-
-let avatar = new Image();
-avatar.src = 'img/avatar.png';
-
-let canvas = document.getElementById("canvas");
-context = canvas.getContext("2d");
+'use strict';
 
 /*
  * Класс оружия
@@ -142,18 +127,31 @@ class Statistic {
     }
 }
 
-let stat = new Statistic();
-let weapons = [];
-weapons.push(new Pistol());
-weapons.push(new Rifle());
-weapons.push(new Shotgun());
-weapons[0].setIsActive(true);
+let bullets = [],
+    points = [],
+    oldX = 0,
+    oldY = 0,
+    x_pos = 0,
+    down = false,
+    PastTime = 0,
+    pic  = new Image(),
+    avatar = new Image(),
+    canvas = document.getElementById("canvas"),
+    context = canvas.getContext("2d"),
+    stat = new Statistic(),
+    weapons = [];
 
 /*
  * Инициализация
  */
 
 function init() {
+    weapons.push(new Pistol());
+    weapons.push(new Shotgun());
+    weapons.push(new Rifle());
+    weapons[0].setIsActive(true);
+    pic.src  = 'img/bum.png';
+    avatar.src = 'img/avatar.png';
     canvas.width = document.documentElement.clientWidth;
     canvas.height = document.documentElement.clientHeight;
     canvas.onmousemove = mouse_position;
@@ -185,7 +183,11 @@ function draw() {
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.closePath();
 
-    if (x_pos >= canvas.width) {x_pos =0; bullets = [];}
+    if (x_pos >= canvas.width) {
+        x_pos =0;
+        bullets = [];
+        points = [];
+    }
     x_pos+=5;
     for (var i=0; i<=bullets.length-1; i++) {
         drawBum(bullets[i][0], bullets[i][1]);
@@ -361,10 +363,10 @@ function shooting(x, y) {
 function shoot(strikes) {
     strikes.forEach(function (coords, i, arr) {
         drawBum(coords[0], coords[1]); // Рисуем отверстие
-        xc = x_pos;
-        yc = (canvas.height/2)-50;
-        var d=Math.sqrt(Math.pow(coords[1]-yc,2)+Math.pow(coords[0]-xc, 2));
-        var rez = Math.ceil(d/20);
+        let xc = x_pos;
+        let yc = (canvas.height/2)-50;
+        let d=Math.sqrt(Math.pow(coords[1]-yc,2)+Math.pow(coords[0]-xc, 2));
+        let rez = Math.ceil(d/20);
 
         if (rez<=10) {
             stat.addScore( Math.ceil(100/rez) ); // Добавляем очки
@@ -389,7 +391,7 @@ function shoot(strikes) {
 }
 
 /*
- * Обработчик, когда клавиша стрельбы зажата
+ * Получение псевдослучайного числа
  * @param Integer min - нижний порог случайного числа
  * @param Integer max - верхний порог случайного числа
  * @return Integer - случайное число в промежутке (min, max)
