@@ -174,6 +174,7 @@ class Statistic {
 }
 
 
+
 let stat = new Statistic();
 
 let weapons = [];
@@ -182,18 +183,23 @@ weapons.push(new Rifle());
 weapons.push(new Shotgun());
 weapons[0].setIsActive(true);
 
+/*
+ * Инициализация
+ */
 
 function init() {
-	//alert('Смена оружия на клавиши: 1 и 2. На основной клавиатуре')
 	canvas.width = document.documentElement.clientWidth;
 	canvas.height = document.documentElement.clientHeight;
 	canvas.onmousemove = mouse_position;
 	canvas.onmousedown = mouse_down;
 	canvas.onmouseup = mouse_up;
-	//canvas.onclick = mouse_click;
 	document.onkeydown = changeWeapons;
 	setInterval(play, 1000 / 50);
 }
+
+/*
+ * Вызывается каждый tick игры
+ */
 
 function play () {
     draw ();
@@ -202,6 +208,10 @@ function play () {
         shooting(oldX, oldY);
     }
 }
+
+/*
+ * Отрисовка всех графических элементов(интерфейс, пули, мишень...)
+ */
 
 function draw() {
 context.beginPath();
@@ -221,6 +231,10 @@ context.closePath();
 	}
 user_interface();
 }
+
+/*
+ * Отрисовка интерфейса
+ */
 
 function user_interface() {
 
@@ -251,6 +265,12 @@ function user_interface() {
 
 }
 
+/*
+ * Отрисовка мишени
+ * @param Integer x - координата x
+ * @param Integer y - координата y
+ */
+
 function michen (x, y) {
 	var k = 200;
 	for (var i= 0; i<=9; i++) {
@@ -270,6 +290,13 @@ function michen (x, y) {
 	context.closePath();
 }
 
+/*
+ * Отрисовка прицела
+ * Стоит упаковать в класс Coursor
+ * @param Integer x - координата x
+ * @param Integer y - координата y
+ */
+
 function drawCursor(x, y) {
 	context.beginPath();
 	context.strokeStyle = "#000";
@@ -281,6 +308,11 @@ function drawCursor(x, y) {
 	context.stroke();
 	context.closePath();
 }
+
+/*
+ * Костыльный перерасчет для позиций
+ * Стоит упаковать в класс Coursor
+ */
 
 function mouse_position(event) {
     var x = 0;
@@ -298,12 +330,22 @@ function mouse_position(event) {
 	oldY = y;
 }
 
+/*
+ * Функция для отрисовки отверстия
+ * @param Integer x - координата x
+ * @param Integer y - координата y
+ */
+
 function drawBum(x, y) {
 	context.beginPath();
-    context.drawImage(pic, x-15, y-15);  // Рисуем изображение от точки с координатами 0, 0
+    context.drawImage(pic, x-15, y-15);
 	context.closePath();
 }
 
+/*
+ * Костыли...
+ * Но работает!
+ */
 
 function mouse_down (event) {
 	down = true;
@@ -313,6 +355,11 @@ function mouse_up (event) {
 	down = false;
 }
 
+/*
+ * Обработчик нажатия клавиши на клавиатере
+ * (Нужно рефакторить + есть баг: можем нажать любую кнопку отличную от 1, 2 или 3 и у нас исчезнет оружие)
+ */
+
 function changeWeapons(event) {
     weapons.forEach(function(weapon, i, list) {
         weapon.setIsActive(false)
@@ -320,38 +367,50 @@ function changeWeapons(event) {
     weapons[event.keyCode - 49].setIsActive(true);
 }
 
+/*
+ * Обработчик, когда клавиша стрельбы зажата
+ * @param Integer x - координата x текущего положения курсора
+ * @param Integer y - координата y текущего положения курсора
+ */
+
 function shooting(x, y) {
     var d = new Date();
     weapons.forEach(function (weapon, i, arr) {
         if(weapon.getIsActive()) {
-            if (d.getTime()-PastTime >= 1000/weapon.getSpeedShoot()) {
+            if (d.getTime()-PastTime >= 1000/weapon.getSpeedShoot()) { // Ограничиваем скорострельность
                 weapon.playSound();
-                shoot(weapon.strikes(x,y));
+                shoot(weapon.strikes(x,y)); // Посылаем в обработчик массив произведенных выстрелов оружием
                 PastTime = d.getTime();
             }
         }
     });
 }
 
+/*
+ * Обработчик, когда клавиша стрельбы зажата
+ * @param Array strikes - массив с координатами пуль от текущего произведенного выстрела.
+ * Массив добавляет гибкости, можем сделать двустволку или еще что-нибудь подобное
+ */
+
 function shoot(strikes) {
     strikes.forEach(function (coords, i, arr) {
-        drawBum(coords[0], coords[1]);
+        drawBum(coords[0], coords[1]); // Рисуем отверстие
         xc = x_pos;
         yc = (canvas.height/2)-50;
         var d=Math.sqrt(Math.pow(coords[1]-yc,2)+Math.pow(coords[0]-xc, 2));
         var rez = Math.ceil(d/20);
 
         if (rez<=10) {
-
-            stat.addScore( Math.ceil(100/rez) );
-            stat.addHits(1);
+            stat.addScore( Math.ceil(100/rez) ); // Добавляем очки
+            stat.addHits(1); // ...и попадания
 
             if (points.length-1>=29) {
-                points.shift();
+                points.shift(); // Ограничение количества отверстий? Но оно не работает
             }
+
             points.push([coords[0], coords[1]-Math.sin(x_pos/100)*100]);
         } else {
-            stat.addMissed(1);
+            stat.addMissed(1); // Добавляем промах
 
             if (bullets.length-1>=30) {
                 bullets.shift();
@@ -363,31 +422,12 @@ function shoot(strikes) {
 
 }
 
-
-function mouse_click (event) {
-	x = 0; y = 0;
-    if (document.attachEvent != null) {
-        x = window.event.clientX;
-        y = window.event.clientY;
-    } else if (!document.attachEvent && document.addEventListener) {
-        x = event.clientX;
-        y = event.clientY;
-    }
-
-    /*
-    НУЖНО РЕФАКТОРИТЬ
-     */
-	if (weapons[0].getIsActive() == true) {
-	    shoot(x,y);
-	}
-	if (weapons[2].getIsActive() == true) {
-        for ($i=0; $i<=9; $i++) {
-            drob_x=getRandomInt(x-60, x+60);
-            drob_y=getRandomInt(y-60, y+60);
-            shoot(drob_x, drob_y);
-        }
-	}
-}
+/*
+ * Обработчик, когда клавиша стрельбы зажата
+ * @param Integer min - нижний порог случайного числа
+ * @param Integer max - верхний порог случайного числа
+ * @return Integer - случайное число в промежутке (min, max)
+ */
 
 function getRandomInt(min, max)
 {
