@@ -119,12 +119,13 @@ class Enemy {
 
     // Может ли укусить игрока
     isBite() {
-        if(this.x > canvas.width - 400) {
-            return true;
-        }
-        return false;
+        return this.x > (canvas.width - 400);
     }
 }
+
+/*
+ * Класс игрока
+ */
 
 class Player {
     constructor() {
@@ -134,6 +135,10 @@ class Player {
         this.x = canvas.width - 200; // Положение на холсте
         this.y = canvas.height/2;
     }
+
+    /*
+     * Отрисовка игрока
+     */
 
     draw() {
         context.beginPath();
@@ -162,8 +167,17 @@ class Player {
         ///////
     }
 
+    /*
+     * Нанесение урона
+     */
+
     getHirt(arg) {
         this.health -= arg;
+        if(this.health < 0) { // Умерли
+            clearInterval(intervalsID[0]);
+            clearInterval(intervalsID[0]); // ...останавливаем рендеринг и генерацию врагов
+            lose(); // Очищаем канвас и уведомляем о проигрыше
+        }
     }
 }
 
@@ -178,7 +192,8 @@ let bullets = [],
     context = canvas.getContext("2d"),
     weapons = [],
     enemies = [],
-    player;
+    player,
+    intervalsID = [];
 
 /*
  * Инициализация
@@ -198,8 +213,8 @@ function init() {
     canvas.onmouseup = mouse_up;
     document.onkeydown = changeWeapons;
     player = new Player();
-    setInterval(play, 1000 / 50);
-    setInterval(createEnemy, 1000);
+    intervalsID.push(setInterval(play, 1000 / 50));
+    intervalsID.push(setInterval(createEnemy, 1000));
 }
 
 function createEnemy() {
@@ -419,6 +434,15 @@ function getRandomInt(min, max)
 
 function getRandomColor() {
     return '#' + getRandomInt(0, 9) + getRandomInt(0, 9) + getRandomInt(0, 9);
+}
+
+function lose() {
+    context.beginPath();
+    context.fillStyle = "#687F75";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#FFF";
+    context.strokeText('Вы проиграли!', canvas.width/2, canvas.height/2);
+    context.closePath();
 }
 
 init();
