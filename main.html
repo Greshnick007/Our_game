@@ -286,6 +286,7 @@ function shooting(x, y) {
     weapons.forEach(function (weapon, i, arr) {
         if(weapon.getIsActive()) {
             if (d.getTime()-PastTime >= 1000/weapon.getSpeedShoot()) {
+                weapon.playSound();
                 shoot(x,y);
                 PastTime = d.getTime();
             }
@@ -293,20 +294,7 @@ function shooting(x, y) {
     });
 }
 
-function auto_shoot(x,y) {
-	var d = new Date();
-	if (weapons[1].getIsActive() == true) {
-		if (d.getTime()-PastTime >= 100) {
-			shoot(x,y);
-			PastTime = d.getTime();
-		}
-	}
-}
-
 function shoot(x,y) {
-    weapons.forEach(function (weapon, i, arr) {
-       if(weapon.getIsActive()) weapon.playSound();
-    });
 	drawBum(x, y);
 	xc = x_pos;
 	yc = (canvas.height/2)-50;
