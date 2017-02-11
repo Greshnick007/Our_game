@@ -40,11 +40,12 @@ class Weapon {
     }
 
     setSound(arg) {
-        this.audio = new Audio();
-        this.audio.src = arg;
+        this.srcAudio = arg;
     }
 
     playSound() {
+        this.audio = new Audio();
+        this.audio.src = this.srcAudio;
         this.audio.play();
     }
 
@@ -64,6 +65,18 @@ class Weapon {
     getIsActive() {
         return this.isActive;
     }
+}
+
+class Pistol extends Weapon {
+
+}
+
+class Rifle extends Weapon {
+
+}
+
+class Shotgun extends Weapon {
+
 }
 
 /*
@@ -110,9 +123,9 @@ class Statistic {
 let stat = new Statistic();
 
 let weapons = [];
-weapons.push(new Weapon('Pistols.png', 'Pistol.mp3'));
-weapons.push(new Weapon('Ralfe.png', 'Ralfe.mp3'));
-weapons.push(new Weapon('Drobash.png', 'Drobovick.mp3'));
+weapons.push(new Pistol('Pistols.png', 'Pistol.mp3'));
+weapons.push(new Rifle('Ralfe.png', 'Ralfe.mp3'));
+weapons.push(new Shotgun('Drobash.png', 'Drobovick.mp3'));
 weapons[0].setIsActive(true);
 
 
@@ -253,7 +266,7 @@ function changeWeapons(event) {
 
 function auto_shoot(x,y) {
 	var d = new Date();
-	if (Ralfe == true) {
+	if (weapons[1].getIsActive() == true) {
 		if (d.getTime()-PastTime >= 100) {
 			shoot(x,y);
 			PastTime = d.getTime();
@@ -262,9 +275,9 @@ function auto_shoot(x,y) {
 }
 
 function shoot(x,y) {
-	var audioMenu = new Audio;
-	if (Pistol == true) {audioMenu.src = "Pistol.mp3";}
-	if (Ralfe == true) {audioMenu.src = "Ralfe.mp3";}
+    weapons.forEach(function (weapon, i, arr) {
+       if(weapon.getIsActive()) weapon.playSound();
+    });
 	drawBum(x, y);
 	xc = x_pos;
 	yc = (canvas.height/2)-50;
@@ -289,7 +302,6 @@ function shoot(x,y) {
 
 		bullets.push([x, y]);
 	}
-	audioMenu.play();
 }
 
 
@@ -302,16 +314,19 @@ function mouse_click (event) {
         x = event.clientX;
         y = event.clientY;
     }
-	if (Pistol == true) {shoot(x,y);}
-	if (Drob == true) {
-	for ($i=0; $i<=9; $i++) {
-		var audioMenu = new Audio;
-		audioMenu.src = "drobovick.mp3";
-		drob_x=getRandomInt(x-60, x+60);
-		drob_y=getRandomInt(y-60, y+60);
-		shoot(drob_x, drob_y);
-		audioMenu.play();
+
+    /*
+    НУЖНО РЕФАКТОРИТЬ
+     */
+	if (weapons[0].getIsActive() == true) {
+	    shoot(x,y);
 	}
+	if (weapons[2].getIsActive() == true) {
+        for ($i=0; $i<=9; $i++) {
+            drob_x=getRandomInt(x-60, x+60);
+            drob_y=getRandomInt(y-60, y+60);
+            shoot(drob_x, drob_y);
+        }
 	}
 }
 
