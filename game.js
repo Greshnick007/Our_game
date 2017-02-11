@@ -348,7 +348,9 @@ function mouse_position(event) {
 
 function drawBum(x, y) {
     context.beginPath();
-    context.drawImage(pic, x-15, y-15);
+    context.fillStyle = "#335544";
+    context.arc(x, y, 2, 0, 2 * Math.PI);
+    context.fill();
     context.closePath();
 }
 
