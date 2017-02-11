@@ -371,10 +371,12 @@ function mouse_up () {
  */
 
 function changeWeapons(event) {
-    weapons.forEach(function(weapon) {
-        weapon.isActive = false;
-    });
-    weapons[event.keyCode - 49].isActive = true;
+    if(event.keyCode >= 49 && event.keyCode <= 49 + weapons.length-1) {
+        weapons.forEach(function(weapon) {
+            weapon.isActive = false;
+        });
+        weapons[event.keyCode - 49].isActive = true;
+    }
 }
 
 /*
@@ -432,9 +434,18 @@ function getRandomInt(min, max)
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/*
+ * Получение псевдослучайного цвета
+ * @return String - случайный цвет в HEX
+ */
+
 function getRandomColor() {
     return '#' + getRandomInt(0, 9) + getRandomInt(0, 9) + getRandomInt(0, 9);
 }
+
+/*
+ * Закрашивание экрана и сообщение о проигрыше
+ */
 
 function lose() {
     context.beginPath();
