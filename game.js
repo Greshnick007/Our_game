@@ -10,11 +10,7 @@ class Weapon {
         this.isActive = false; // Является выбранным?
         this.setSpeedShoot(speedShoot); // Скорострельность
         this.setRazbros(razbros); // Разброс
-        this.setStrikesPerShoot(strikesPerShoot); // Количество пуль за выстрел
-    }
-
-    setStrikesPerShoot(arg) {
-        this.strikesPerShoot = arg;
+        this.strikesPerShoot = strikesPerShoot; // Количество пуль за выстрел
     }
 
     setRazbros(arg) {
