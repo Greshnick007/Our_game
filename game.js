@@ -49,7 +49,7 @@ class Statistic {
     constructor() {
         this.hits = 0; // Попадания
         this.missed = 0; // Мимо
-        this.money = 0; // Текущие очки
+        this.money = 0; // Текущие деньги
     }
 
     addMoney(arg) {
@@ -67,37 +67,46 @@ class Statistic {
 
 class Enemy {
     constructor() {
-        this.x = 0;
-        this.y = canvas.height/2 + getRandomInt(-200, 200);
+        this.x = 0; // Начальная координата x
+        this.y = canvas.height/2 + getRandomInt(-200, 200);// Начальная координата y
         this.date = new Date();
         this.pastTime = this.date.getTime();
-        this.colorBody = getRandomColor();
-        this.colorEye = getRandomColor();
+        this.colorBody = getRandomColor(); // Цвет тела
+        this.colorEye = getRandomColor(); // Цвет глаз
     }
 
     draw() {
-        this.go();
+        this.go(); // Двигаем врага
+
+        /*
+         * Нарисуйте врага здесь
+         */
         context.beginPath();
+        // Тело
         context.fillStyle = this.colorBody;
         context.fillRect(this.x, this.y, 50, 50);
+        // Глаза
         context.fillStyle = this.colorEye;
         context.fillRect(this.x+5, this.y+10, 15, 15);
         context.fillRect(this.x+25, this.y+10, 15, 15);
+
         context.closePath();
+        ///////
     }
 
     go() {
         this.date = new Date();
         if (this.date.getTime()-this.pastTime >= 500) {
-            this.x += 50;
+            this.x += 50; // Скорость движения к игроку
             this.y += getRandomInt(-10,10);
             if(this.y < 200) this.y = 200;
             if(this.y > canvas.height-200) this.y = canvas.height-200;
+            if(this.x > canvas.width - 300) this.x = canvas.width - 300; // Не даем уйти за границу к игроку
             this.pastTime = this.date.getTime();
-
         }
     }
 
+    // Попали ли по врагу
     isHit(x, y) {
         if( (x < this.x+50) && (x > this.x) ) {
             if( (y < this.y+50) && (y > this.y) ) {
@@ -108,8 +117,9 @@ class Enemy {
         return false;
     }
 
-    isGone() {
-        if(this.x >= canvas.width) {
+    // Может ли укусить игрока
+    isBite() {
+        if(this.x > canvas.width - 400) {
             return true;
         }
         return false;
@@ -119,24 +129,56 @@ class Enemy {
 class Player {
     constructor() {
         this.stat = new Statistic();
+        this.health = 100; // Начальное здоровье
+        this.maxHealth = 100; // Мкс. здоровья
+        this.x = canvas.width - 200; // Положение на холсте
+        this.y = canvas.height/2;
+    }
+
+    draw() {
+        context.beginPath();
+        // Отображаем здоровье
+        context.strokeStyle = "#FFF";
+        context.font = 'bold 30px sans-serif';
+        context.strokeText(this.health+'/'+this.maxHealth, this.x, this.y+200);
+        //Голова
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(this.x, this.y, 50, 50);
+        // Глаза
+        context.fillStyle = "#000";
+        context.fillRect(this.x+5, this.y+10, 15, 15);
+        context.fillRect(this.x+25, this.y+10, 15, 15);
+        // Телов и руки
+        context.fillStyle = "#88FF22";
+        context.fillRect(this.x+10, this.y+50, 30, 70);
+        context.fillStyle = "#225F22";
+        context.fillRect(this.x-20, this.y+70, 20, 20);
+        context.fillRect(this.x+10, this.y+70, 20, 20);
+        // Оружие
+        context.fillStyle = "#000";
+        context.fillRect(this.x-40, this.y+60, 100, 15);
+        context.closePath();
+
+        ///////
+    }
+
+    getHirt(arg) {
+        this.health -= arg;
     }
 }
 
 let bullets = [],
-    points = [],
     oldX = 0,
     oldY = 0,
-    x_pos = 0,
     down = false,
     PastTime = 0,
     pic  = new Image(),
     avatar = new Image(),
     canvas = document.getElementById("canvas"),
     context = canvas.getContext("2d"),
-    stat = new Statistic(),
     weapons = [],
     enemies = [],
-    player = new Player();
+    player;
 
 /*
  * Инициализация
@@ -155,6 +197,7 @@ function init() {
     canvas.onmousedown = mouse_down;
     canvas.onmouseup = mouse_up;
     document.onkeydown = changeWeapons;
+    player = new Player();
     setInterval(play, 1000 / 50);
     setInterval(createEnemy, 1000);
 }
@@ -162,9 +205,8 @@ function init() {
 function createEnemy() {
     enemies.push(new Enemy());
     enemies.forEach(function(enemy, i){
-        if(enemy.isGone()) {
-            player.stat.addMoney(-5000);
-            enemies.splice(i, 1); // Ушел за экран - удаляе и отнимаем очки
+        if(enemy.isBite()) {
+            player.getHirt(1);
         }
     });
 }
@@ -202,6 +244,7 @@ function draw() {
         drawBum(bullets[i][0], bullets[i][1]);
     }
     user_interface();
+    player.draw();
 }
 
 /*
