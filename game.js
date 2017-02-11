@@ -6,15 +6,11 @@
 class Weapon {
     constructor(imageSource, soundSource, speedShoot, razbros, strikesPerShoot) {
         this.setImage(imageSource); // Изображение оружия
-        this.setSound(soundSource); // Звук оружия
+        this.srcAudio = soundSource; // Звук оружия
         this.isActive = false; // Является выбранным?
         this.speedShot = speedShoot; // Скорострельность
         this.razbros = razbros; // Разброс
         this.strikesPerShoot = strikesPerShoot; // Количество пуль за выстрел
-    }
-
-    setSound(arg) {
-        this.srcAudio = arg;
     }
 
     playSound() {
@@ -30,14 +26,6 @@ class Weapon {
 
     getImage() {
         return this.image;
-    }
-
-    setIsActive(arg) {
-        this.isActive = arg;
-    }
-
-    getIsActive() {
-        return this.isActive;
     }
 
     strikes(x, y) {
@@ -75,18 +63,6 @@ class Statistic {
     addHits(arg) {
         this.hits += arg;
     }
-
-    getScore(){
-        return this.score;
-    }
-
-    getHits(){
-        return this.hits;
-    }
-
-    getMissed(){
-        return this.missed;
-    }
 }
 
 let bullets = [],
@@ -111,7 +87,7 @@ function init() {
     weapons.push(new Weapon('img/Pistols.png', 'sounds/Pistol.mp3', 2, 80, 1));
     weapons.push(new Weapon('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 160, 1));
     weapons.push(new Weapon('img/Drobash.png', 'sounds/Drobovick.mp3', 1, 240, 10));
-    weapons[0].setIsActive(true);
+    weapons[0].isActive = true;
     pic.src  = 'img/bum.png';
     avatar.src = 'img/avatar.png';
     canvas.width = document.documentElement.clientWidth;
@@ -171,8 +147,13 @@ function user_interface() {
     weapons.forEach(function(weapon, i, arr) {
         context.beginPath();
         context.strokeStyle = "#1B1FFF";
-        if (weapon.getIsActive() === true) {context.fillStyle = "#ccc";}
-        else {context.fillStyle = "#fff";}
+
+        if (weapon.isActive === true) {
+            context.fillStyle = "#ccc";
+        } else {
+            context.fillStyle = "#fff";
+        }
+
         context.strokeRect(5+(165*i),5, 155, 85);
         context.fillRect(5+(165*i),5, 155, 85);
         context.drawImage(weapon.getImage(), 10+(165*i), 10);
@@ -188,11 +169,10 @@ function user_interface() {
     context.drawImage(avatar, 10, canvas.height-160);
     context.strokeStyle = "#FFF";
     context.font = 'bold 30px sans-serif';
-    context.strokeText(stat.getScore(), canvas.width/2, canvas.height-35);
-    context.strokeText('Попал: '+stat.getHits(), 400, canvas.height-35);
-    context.strokeText('Мимо: '+stat.getMissed(), 900, canvas.height-35);
+    context.strokeText(stat.score, canvas.width/2, canvas.height-35);
+    context.strokeText('Попал: '+stat.hits, 400, canvas.height-35);
+    context.strokeText('Мимо: '+stat.missed, 900, canvas.height-35);
     context.closePath();
-
 }
 
 /*
@@ -245,8 +225,9 @@ function drawCursor(x, y) {
  */
 
 function mouse_position(event) {
-    var x = 0;
-    var y = 0;
+    let x = 0;
+    let y = 0;
+
     if (document.attachEvent != null) {
         x = window.event.clientX;
         y = window.event.clientY;
@@ -277,11 +258,11 @@ function drawBum(x, y) {
  * Но работает!
  */
 
-function mouse_down (event) {
+function mouse_down () {
     down = true;
 }
 
-function mouse_up (event) {
+function mouse_up () {
     down = false;
 }
 
@@ -292,9 +273,9 @@ function mouse_up (event) {
 
 function changeWeapons(event) {
     weapons.forEach(function(weapon, i, list) {
-        weapon.setIsActive(false)
+        weapon.isActive = false;
     });
-    weapons[event.keyCode - 49].setIsActive(true);
+    weapons[event.keyCode - 49].isActive = true;
 }
 
 /*
@@ -306,7 +287,7 @@ function changeWeapons(event) {
 function shooting(x, y) {
     var d = new Date();
     weapons.forEach(function (weapon, i, arr) {
-        if(weapon.getIsActive()) {
+        if(weapon.isActive) {
             if (d.getTime()-PastTime >= 1000/weapon.speedShot) { // Ограничиваем скорострельность
                 weapon.playSound();
                 shoot(weapon.strikes(x,y)); // Посылаем в обработчик массив произведенных выстрелов оружием
@@ -333,19 +314,9 @@ function shoot(strikes) {
         if (rez<=10) {
             stat.addScore( Math.ceil(100/rez) ); // Добавляем очки
             stat.addHits(1); // ...и попадания
-
-            if (points.length-1>=10) {
-                points.shift(); // Ограничение количества отверстий? Но оно не работает
-            }
-
             points.push([coords[0], coords[1]-Math.sin(x_pos/100)*100]);
         } else {
             stat.addMissed(1); // Добавляем промах
-
-            if (bullets.length-1>=30) {
-                bullets.shift();
-            }
-
             bullets.push([coords[0], coords[1]]);
         }
     });
