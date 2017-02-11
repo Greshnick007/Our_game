@@ -96,9 +96,9 @@ class Enemy {
 
     go() {
         this.date = new Date();
-        if (this.date.getTime()-this.pastTime >= 500) {
-            this.x += 50; // Скорость движения к игроку
-            this.y += getRandomInt(-10,10);
+        if (this.date.getTime()-this.pastTime >= 10) {
+            this.x += 2.5; // Скорость движения к игроку
+            this.y += getRandomInt(-1,1);
             if(this.y < 200) this.y = 200;
             if(this.y > canvas.height-200) this.y = canvas.height-200;
             if(this.x > canvas.width - 300) this.x = canvas.width - 300; // Не даем уйти за границу к игроку
