@@ -65,6 +65,47 @@ class Statistic {
     }
 }
 
+class Enemy {
+    constructor() {
+        this.x = 0;
+        this.y = canvas.height/2 + getRandomInt(-200, 200);
+        this.date = new Date();
+        this.pastTime = this.date.getTime();
+    }
+
+    draw() {
+        this.go();
+        context.beginPath();
+        context.fillStyle = "#00F0FF";
+        context.fillRect(this.x, this.y, 50, 50);
+        context.fillStyle = "#0000FF";
+        context.fillRect(this.x+5, this.y+10, 15, 15);
+        context.fillRect(this.x+25, this.y+10, 15, 15);
+        context.closePath();
+    }
+
+    go() {
+        this.date = new Date();
+        if (this.date.getTime()-this.pastTime >= 500) {
+            this.x += 5;
+            this.y += getRandomInt(-10,10);
+            if(this.y < 200) this.y = 200;
+            if(this.y > canvas.height-200) this.y = canvas.height-200;
+            this.pastTime = this.date.getTime();
+        }
+    }
+
+    isHit(x, y) {
+        if( (x < this.x+50) && (x > this.x) ) {
+            if( (y < this.y+50) && (y > this.y) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
 let bullets = [],
     points = [],
     oldX = 0,
@@ -77,7 +118,8 @@ let bullets = [],
     canvas = document.getElementById("canvas"),
     context = canvas.getContext("2d"),
     stat = new Statistic(),
-    weapons = [];
+    weapons = [],
+    enemies = [];
 
 /*
  * Инициализация
@@ -88,6 +130,7 @@ function init() {
     weapons.push(new Weapon('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 160, 1));
     weapons.push(new Weapon('img/Drobash.png', 'sounds/Drobovick.mp3', 1, 240, 10));
     weapons[0].isActive = true;
+    enemies.push(new Enemy());
     pic.src  = 'img/bum.png';
     avatar.src = 'img/avatar.png';
     canvas.width = document.documentElement.clientWidth;
@@ -97,6 +140,11 @@ function init() {
     canvas.onmouseup = mouse_up;
     document.onkeydown = changeWeapons;
     setInterval(play, 1000 / 50);
+    setInterval(createEnemy, 1000);
+}
+
+function createEnemy() {
+    enemies.push(new Enemy());
 }
 
 /*
@@ -120,6 +168,10 @@ function draw() {
     context.fillStyle = "#687F75";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.closePath();
+
+    enemies.forEach(function (enemy) {
+        enemy.draw();
+    });
 
     if (x_pos >= canvas.width) {
         x_pos =0;
@@ -319,6 +371,15 @@ function shoot(strikes) {
             stat.addMissed(1); // Добавляем промах
             bullets.push([coords[0], coords[1]]);
         }
+        enemies.forEach(function(enemy, i, arr){
+            if(enemy.isHit(coords[0], coords[1])) {
+                stat.addHits(1);
+                stat.addScore(100);
+                enemies.splice(i, 1);
+                enemies.push(new Enemy());
+            }
+
+        });
     });
 
 }
