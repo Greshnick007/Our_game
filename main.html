@@ -33,18 +33,27 @@ var PastTime = 0;
  * Класс оружия
 */
 class Weapon {
-    constructor(imageSource, soundSource, speedShoot) {
+    constructor(imageSource, soundSource, speedShoot, razbros) {
         this.setImage(imageSource); // Изображение оружия
         this.setSound(soundSource); // Звук оружия
         this.isActive = false; // Является выбранным?
         this.setSpeedShoot(speedShoot); // Скорострельность
+        this.setRazbros(razbros); // Разброс
+    }
+
+    setRazbros(arg) {
+        this.razbros = arg;
+    }
+
+    getRazbros() {
+        return this.razbros;
     }
 
     setSpeedShoot(arg) {
         this.speedShot = arg;
     }
 
-    getSpeedShoot(arg) {
+    getSpeedShoot() {
         return this.speedShot;
     }
 
@@ -78,19 +87,49 @@ class Weapon {
 
 class Pistol extends Weapon {
     constructor() {
-        super('Pistols.png', 'Pistol.mp3', 2);
+        super('Pistols.png', 'Pistol.mp3', 2, 80);
+    }
+
+    strikes(x, y) {
+        let array = [];
+        array.push([
+                x + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2),
+                y + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2)
+        ]);
+        return array;
     }
 }
 
 class Rifle extends Weapon {
     constructor() {
-        super('Ralfe.png', 'Ralfe.mp3', 5);
+        super('Ralfe.png', 'Ralfe.mp3', 5, 160);
+    }
+
+    strikes(x, y) {
+        let array = [];
+        array.push([
+            x + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2),
+            y + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2)
+        ]);
+        return array;
     }
 }
 
 class Shotgun extends Weapon {
     constructor() {
-        super('Drobash.png', 'Drobovick.mp3', 1);
+        super('Drobash.png', 'Drobovick.mp3', 1, 240);
+    }
+
+    strikes(x, y) {
+        let array = [];
+        let i;
+        for(i = 0; i<10; ++i) {
+            array.push([
+                x + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2),
+                y + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2)
+            ]);
+        }
+        return array;
     }
 }
 
@@ -287,38 +326,41 @@ function shooting(x, y) {
         if(weapon.getIsActive()) {
             if (d.getTime()-PastTime >= 1000/weapon.getSpeedShoot()) {
                 weapon.playSound();
-                shoot(x,y);
+                shoot(weapon.strikes(x,y));
                 PastTime = d.getTime();
             }
         }
     });
 }
 
-function shoot(x,y) {
-	drawBum(x, y);
-	xc = x_pos;
-	yc = (canvas.height/2)-50;
-	var d=Math.sqrt(Math.pow(y-yc,2)+Math.pow(x-xc, 2));
-	var rez = Math.ceil(d/20);
+function shoot(strikes) {
+    strikes.forEach(function (coords, i, arr) {
+        drawBum(coords[0], coords[1]);
+        xc = x_pos;
+        yc = (canvas.height/2)-50;
+        var d=Math.sqrt(Math.pow(coords[1]-yc,2)+Math.pow(coords[0]-xc, 2));
+        var rez = Math.ceil(d/20);
 
-	if (rez<=10) {
+        if (rez<=10) {
 
-		stat.addScore( Math.ceil(100/rez) );
-        stat.addHits(1);
+            stat.addScore( Math.ceil(100/rez) );
+            stat.addHits(1);
 
-		if (points.length-1>=29) {
-			points.shift();
-		}
-		points.push([x, y-Math.sin(x_pos/100)*100]);
-	} else {
-	    stat.addMissed(1);
+            if (points.length-1>=29) {
+                points.shift();
+            }
+            points.push([coords[0], coords[1]-Math.sin(x_pos/100)*100]);
+        } else {
+            stat.addMissed(1);
 
-		if (bullets.length-1>=30) {
-			bullets.shift();
-		}
+            if (bullets.length-1>=30) {
+                bullets.shift();
+            }
 
-		bullets.push([x, y]);
-	}
+            bullets.push([coords[0], coords[1]]);
+        }
+    });
+
 }
 
 
