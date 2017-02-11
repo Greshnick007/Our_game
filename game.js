@@ -200,9 +200,9 @@ let bullets = [],
  */
 
 function init() {
-    weapons.push(new Weapon('img/Pistols.png', 'sounds/Pistol.mp3', 2, 80, 1));
-    weapons.push(new Weapon('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 160, 1));
-    weapons.push(new Weapon('img/Drobash.png', 'sounds/Drobovick.mp3', 1, 240, 10));
+    weapons.push(new Weapon('img/Pistols.png', 'sounds/Pistol.mp3', 2, 30, 1));
+    weapons.push(new Weapon('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 60, 1));
+    weapons.push(new Weapon('img/Drobash.png', 'sounds/drobovick.mp3', 1, 80, 7));
     weapons[0].isActive = true;
     pic.src  = 'img/bum.png';
     avatar.src = 'img/avatar.png';
