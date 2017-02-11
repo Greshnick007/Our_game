@@ -1,33 +1,35 @@
-var bullets = [];
-var points = [];
+let bullets = [],
+    points = [],
+    oldX = 0,
+    oldY = 0,
+    x_pos = 0,
+    down = false,
+    PastTime = 0;
 
-
-var oldX = 0;
-var oldY = 0;
-var pic  = new Image();
+let pic  = new Image();
 pic.src  = 'img/bum.png';
-var avatar = new Image();
+
+let avatar = new Image();
 avatar.src = 'img/avatar.png';
-var canvas = document.getElementById("canvas");
+
+let canvas = document.getElementById("canvas");
 context = canvas.getContext("2d");
-var k = 105;
-
-var x_pos = 0;
-var down = false;
-var PastTime = 0;
-
-
 
 /*
  * Класс оружия
  */
 class Weapon {
-    constructor(imageSource, soundSource, speedShoot, razbros) {
+    constructor(imageSource, soundSource, speedShoot, razbros, strikesPerShoot) {
         this.setImage(imageSource); // Изображение оружия
         this.setSound(soundSource); // Звук оружия
         this.isActive = false; // Является выбранным?
         this.setSpeedShoot(speedShoot); // Скорострельность
         this.setRazbros(razbros); // Разброс
+        this.setStrikesPerShoot(strikesPerShoot); // Количество пуль за выстрел
+    }
+
+    setStrikesPerShoot(arg) {
+        this.strikesPerShoot = arg;
     }
 
     setRazbros(arg) {
@@ -72,53 +74,35 @@ class Weapon {
     getIsActive() {
         return this.isActive;
     }
-}
-
-class Pistol extends Weapon {
-    constructor() {
-        super('img/Pistols.png', 'sounds/Pistol.mp3', 2, 80);
-    }
-
-    strikes(x, y) {
-        let array = [];
-        array.push([
-            x + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2),
-            y + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2)
-        ]);
-        return array;
-    }
-}
-
-class Rifle extends Weapon {
-    constructor() {
-        super('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 160);
-    }
-
-    strikes(x, y) {
-        let array = [];
-        array.push([
-            x + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2),
-            y + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2)
-        ]);
-        return array;
-    }
-}
-
-class Shotgun extends Weapon {
-    constructor() {
-        super('img/Drobash.png', 'sounds/Drobovick.mp3', 1, 240);
-    }
 
     strikes(x, y) {
         let array = [];
         let i;
-        for(i = 0; i<10; ++i) {
+        for(i = 0; i<this.strikesPerShoot; ++i) {
             array.push([
                 x + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2),
                 y + getRandomInt(0 -  this.getRazbros()/2, this.getRazbros()/2)
             ]);
         }
         return array;
+    }
+}
+
+class Pistol extends Weapon {
+    constructor() {
+        super('img/Pistols.png', 'sounds/Pistol.mp3', 2, 80, 1);
+    }
+}
+
+class Rifle extends Weapon {
+    constructor() {
+        super('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 160, 1);
+    }
+}
+
+class Shotgun extends Weapon {
+    constructor() {
+        super('img/Drobash.png', 'sounds/Drobovick.mp3', 1, 240, 10);
     }
 }
 
@@ -156,16 +140,9 @@ class Statistic {
     getMissed(){
         return this.missed;
     }
-
-    clearStat() {
-        constructor();
-    }
 }
 
-
-
 let stat = new Statistic();
-
 let weapons = [];
 weapons.push(new Pistol());
 weapons.push(new Rifle());
@@ -393,7 +370,7 @@ function shoot(strikes) {
             stat.addScore( Math.ceil(100/rez) ); // Добавляем очки
             stat.addHits(1); // ...и попадания
 
-            if (points.length-1>=29) {
+            if (points.length-1>=10) {
                 points.shift(); // Ограничение количества отверстий? Но оно не работает
             }
 
