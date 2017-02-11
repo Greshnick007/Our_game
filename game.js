@@ -127,11 +127,11 @@ function draw() {
         points = [];
     }
     x_pos+=5;
-    for (var i=0; i<=bullets.length-1; i++) {
+    for (let i=0; i<=bullets.length-1; i++) {
         drawBum(bullets[i][0], bullets[i][1]);
     }
     michen(x_pos, (canvas.height/2)-50+Math.sin(x_pos/100)*100);
-    for (var i=0; i<=points.length-1; i++) {
+    for (let i=0; i<=points.length-1; i++) {
         points[i][0] +=5;
         drawBum(points[i][0], points[i][1]+Math.sin(x_pos/100)*100);
     }
@@ -144,7 +144,7 @@ function draw() {
 
 function user_interface() {
 
-    weapons.forEach(function(weapon, i, arr) {
+    weapons.forEach(function(weapon, i) {
         context.beginPath();
         context.strokeStyle = "#1B1FFF";
 
@@ -272,7 +272,7 @@ function mouse_up () {
  */
 
 function changeWeapons(event) {
-    weapons.forEach(function(weapon, i, list) {
+    weapons.forEach(function(weapon) {
         weapon.isActive = false;
     });
     weapons[event.keyCode - 49].isActive = true;
@@ -286,7 +286,7 @@ function changeWeapons(event) {
 
 function shooting(x, y) {
     var d = new Date();
-    weapons.forEach(function (weapon, i, arr) {
+    weapons.forEach(function (weapon) {
         if(weapon.isActive) {
             if (d.getTime()-PastTime >= 1000/weapon.speedShot) { // Ограничиваем скорострельность
                 weapon.playSound();
@@ -304,7 +304,7 @@ function shooting(x, y) {
  */
 
 function shoot(strikes) {
-    strikes.forEach(function (coords, i, arr) {
+    strikes.forEach(function (coords) {
         drawBum(coords[0], coords[1]); // Рисуем отверстие
         let xc = x_pos;
         let yc = (canvas.height/2)-50;
