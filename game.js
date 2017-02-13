@@ -39,6 +39,22 @@ class Weapon {
         }
         return array;
     }
+
+    draw(position) {
+        context.beginPath();
+        context.strokeStyle = "#1B1FFF";
+
+        if (this.isActive === true) {
+            context.fillStyle = "#ccc";
+        } else {
+            context.fillStyle = "#fff";
+        }
+
+        context.strokeRect(5+(165*position),5, 155, 85);
+        context.fillRect(5+(165*position),5, 155, 85);
+        context.drawImage(this.getImage(), 10+(165*position), 10);
+        context.closePath();
+    }
 }
 
 /*
@@ -59,20 +75,21 @@ class Statistic {
     addMissed(arg) {
         this.missed += arg;
     }
-
-    addHits(arg) {
-        this.hits += arg;
-    }
 }
 
 class Enemy {
-    constructor() {
-        this.x = 0; // Начальная координата x
+    constructor(level) {
+        this.x = -300; // Начальная координата x
         this.y = canvas.height/2 + getRandomInt(-200, 200);// Начальная координата y
         this.date = new Date();
         this.pastTime = this.date.getTime();
         this.colorBody = getRandomColor(); // Цвет тела
         this.colorEye = getRandomColor(); // Цвет глаз
+        this.level = level; // Уровень врага
+        //Переменные для движения//
+        this.xSpeed = getRandomInt(10, 20 + this.level) / 10;
+        this.yinc = 0; //
+        this.lastTimeOfChangeTraectory = this.pastTime;
     }
 
     draw() {
@@ -94,16 +111,35 @@ class Enemy {
         ///////
     }
 
+    //Двигаем его
     go() {
         this.date = new Date();
+
+        // Задаем время частоты изменения траектории движения
+        if (this.date.getTime()-this.lastTimeOfChangeTraectory >= 500) {
+            this.changeTraectory();
+            this.lastTimeOfChangeTraectory = this.date.getTime();
+        }
+
+        // Задаем время частоты изменения координат
         if (this.date.getTime()-this.pastTime >= 10) {
-            this.x += 2.5; // Скорость движения к игроку
-            this.y += getRandomInt(-1,1);
-            if(this.y < 200) this.y = 200;
-            if(this.y > canvas.height-200) this.y = canvas.height-200;
+            this.x += this.xSpeed; // Скорость движения к игроку
+            this.y += this.yinc / (15 + (100/this.level));
+            if(this.y < 200) {
+                this.y = 200;
+                this.changeTraectory();
+            }
+            if(this.y > canvas.height-200) {
+                this.y = canvas.height-200;
+                this.changeTraectory();
+            }
             if(this.x > canvas.width - 300) this.x = canvas.width - 300; // Не даем уйти за границу к игроку
             this.pastTime = this.date.getTime();
         }
+    }
+
+    changeTraectory() {
+        this.yinc = getRandomInt(-80, 80);
     }
 
     // Попали ли по врагу
@@ -130,10 +166,25 @@ class Enemy {
 class Player {
     constructor() {
         this.stat = new Statistic();
-        this.health = 100; // Начальное здоровье
+        this.health = 10; // Начальное здоровье
         this.maxHealth = 100; // Мкс. здоровья
         this.x = canvas.width - 200; // Положение на холсте
         this.y = canvas.height/2;
+        this.level = 1;
+    }
+
+    heal() {
+        this.health += this.level;
+        if(this.health > this.maxHealth) {
+            this.health = this.maxHealth;
+        }
+    }
+
+    addScore(arg) {
+        this.stat.hits += arg;
+        if(this.stat.hits > Math.pow(4, this.level)) {
+            this.level++;
+        }
     }
 
     /*
@@ -144,8 +195,10 @@ class Player {
         context.beginPath();
         // Отображаем здоровье
         context.strokeStyle = "#FFF";
-        context.font = 'bold 30px sans-serif';
+        context.font = 'bold 20px sans-serif';
         context.strokeText(this.health+'/'+this.maxHealth, this.x, this.y+200);
+        // Отображение уровня
+        context.strokeText('Уровень: ' + this.level, this.x, this.y+222);
         //Голова
         context.fillStyle = "#FFFFFF";
         context.fillRect(this.x, this.y, 50, 50);
@@ -202,7 +255,7 @@ let bullets = [],
 function init() {
     weapons.push(new Weapon('img/Pistols.png', 'sounds/Pistol.mp3', 2, 30, 1));
     weapons.push(new Weapon('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 60, 1));
-    weapons.push(new Weapon('img/Drobash.png', 'sounds/drobovick.mp3', 1, 80, 7));
+    weapons.push(new Weapon('img/Drobash.png', 'sounds/drobovick.mp3', 1, 140, 7));
     weapons[0].isActive = true;
     pic.src  = 'img/bum.png';
     avatar.src = 'img/avatar.png';
@@ -218,7 +271,10 @@ function init() {
 }
 
 function createEnemy() {
-    enemies.push(new Enemy());
+    player.heal();
+    for (let i = 0; i < getRandomInt(1, 1 + player.level/2); i++) {
+        enemies.push(new Enemy(player.level));
+    }
     enemies.forEach(function(enemy, i){
         if(enemy.isBite()) {
             player.getHirt(1);
@@ -276,19 +332,7 @@ function draw() {
 function user_interface() {
 
     weapons.forEach(function(weapon, i) {
-        context.beginPath();
-        context.strokeStyle = "#1B1FFF";
-
-        if (weapon.isActive === true) {
-            context.fillStyle = "#ccc";
-        } else {
-            context.fillStyle = "#fff";
-        }
-
-        context.strokeRect(5+(165*i),5, 155, 85);
-        context.fillRect(5+(165*i),5, 155, 85);
-        context.drawImage(weapon.getImage(), 10+(165*i), 10);
-        context.closePath();
+        weapon.draw(i);
     }); // Рендерим оружие
 
     context.beginPath();
@@ -422,7 +466,7 @@ function shoot(strikes) {
 
         enemies.forEach(function(enemy, i, arr){
             if(enemy.isHit(coords[0], coords[1])) {
-                player.stat.addHits(1);
+                player.addScore(1);
                 player.stat.addMoney(100);
                 enemies.splice(i, 1); // Убит - удаляем и добавляем очки
             }
@@ -463,6 +507,7 @@ function lose() {
     context.fillStyle = "#FFF";
     context.strokeText('Вы проиграли!', canvas.width/2, canvas.height/2);
     context.closePath();
+    user_interface();
 }
 
 init();
