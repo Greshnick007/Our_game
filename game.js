@@ -82,13 +82,14 @@ class Statistic {
 }
 
 class Enemy {
-    constructor() {
+    constructor(level) {
         this.x = 0; // Начальная координата x
         this.y = canvas.height/2 + getRandomInt(-200, 200);// Начальная координата y
         this.date = new Date();
         this.pastTime = this.date.getTime();
         this.colorBody = getRandomColor(); // Цвет тела
         this.colorEye = getRandomColor(); // Цвет глаз
+        this.level = level; // Уровень врага
         //Переменные для движения//
         this.yinc = 0; //
         this.lastTimeOfChangeTraectory = this.pastTime;
@@ -126,7 +127,7 @@ class Enemy {
         // Задаем время частоты изменения координат
         if (this.date.getTime()-this.pastTime >= 10) {
             this.x += 2.5; // Скорость движения к игроку
-            this.y += this.yinc/40;
+            this.y += this.yinc / (15 + (100/this.level));
             if(this.y < 200) {
                 this.y = 200;
                 this.changeTraectory();
@@ -256,7 +257,7 @@ function init() {
 }
 
 function createEnemy() {
-    enemies.push(new Enemy());
+    enemies.push(new Enemy(player.stat.hits));
     enemies.forEach(function(enemy, i){
         if(enemy.isBite()) {
             player.getHirt(1);
