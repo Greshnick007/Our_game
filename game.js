@@ -75,15 +75,11 @@ class Statistic {
     addMissed(arg) {
         this.missed += arg;
     }
-
-    addHits(arg) {
-        this.hits += arg;
-    }
 }
 
 class Enemy {
     constructor(level) {
-        this.x = 0; // Начальная координата x
+        this.x = -50; // Начальная координата x
         this.y = canvas.height/2 + getRandomInt(-200, 200);// Начальная координата y
         this.date = new Date();
         this.pastTime = this.date.getTime();
@@ -91,6 +87,7 @@ class Enemy {
         this.colorEye = getRandomColor(); // Цвет глаз
         this.level = level; // Уровень врага
         //Переменные для движения//
+        this.xSpeed = getRandomInt(10, 20 + this.level) / 10;
         this.yinc = 0; //
         this.lastTimeOfChangeTraectory = this.pastTime;
     }
@@ -126,7 +123,7 @@ class Enemy {
 
         // Задаем время частоты изменения координат
         if (this.date.getTime()-this.pastTime >= 10) {
-            this.x += 2.5; // Скорость движения к игроку
+            this.x += this.xSpeed; // Скорость движения к игроку
             this.y += this.yinc / (15 + (100/this.level));
             if(this.y < 200) {
                 this.y = 200;
@@ -173,6 +170,14 @@ class Player {
         this.maxHealth = 100; // Мкс. здоровья
         this.x = canvas.width - 200; // Положение на холсте
         this.y = canvas.height/2;
+        this.level = 1;
+    }
+
+    addScore(arg) {
+        this.stat.hits += arg;
+        if(this.stat.hits > Math.pow(4, this.level)) {
+            this.level++;
+        }
     }
 
     /*
@@ -185,6 +190,8 @@ class Player {
         context.strokeStyle = "#FFF";
         context.font = 'bold 30px sans-serif';
         context.strokeText(this.health+'/'+this.maxHealth, this.x, this.y+200);
+        // Отображение уровня
+        context.strokeText('Уровень: ' + this.level, this.x, this.y+300);
         //Голова
         context.fillStyle = "#FFFFFF";
         context.fillRect(this.x, this.y, 50, 50);
@@ -241,7 +248,7 @@ let bullets = [],
 function init() {
     weapons.push(new Weapon('img/Pistols.png', 'sounds/Pistol.mp3', 2, 30, 1));
     weapons.push(new Weapon('img/Ralfe.png', 'sounds/Ralfe.mp3', 5, 60, 1));
-    weapons.push(new Weapon('img/Drobash.png', 'sounds/drobovick.mp3', 1, 80, 7));
+    weapons.push(new Weapon('img/Drobash.png', 'sounds/drobovick.mp3', 1, 140, 7));
     weapons[0].isActive = true;
     pic.src  = 'img/bum.png';
     avatar.src = 'img/avatar.png';
@@ -257,7 +264,9 @@ function init() {
 }
 
 function createEnemy() {
-    enemies.push(new Enemy(player.stat.hits));
+    for (let i = 0; i < getRandomInt(1, player.level); i++) {
+        enemies.push(new Enemy(player.level));
+    }
     enemies.forEach(function(enemy, i){
         if(enemy.isBite()) {
             player.getHirt(1);
@@ -449,7 +458,7 @@ function shoot(strikes) {
 
         enemies.forEach(function(enemy, i, arr){
             if(enemy.isHit(coords[0], coords[1])) {
-                player.stat.addHits(1);
+                player.addScore(1);
                 player.stat.addMoney(100);
                 enemies.splice(i, 1); // Убит - удаляем и добавляем очки
             }
@@ -490,6 +499,7 @@ function lose() {
     context.fillStyle = "#FFF";
     context.strokeText('Вы проиграли!', canvas.width/2, canvas.height/2);
     context.closePath();
+    user_interface();
 }
 
 init();
