@@ -39,6 +39,22 @@ class Weapon {
         }
         return array;
     }
+
+    draw() {
+        context.beginPath();
+        context.strokeStyle = "#1B1FFF";
+
+        if (this.isActive === true) {
+            context.fillStyle = "#ccc";
+        } else {
+            context.fillStyle = "#fff";
+        }
+
+        context.strokeRect(5+(165*i),5, 155, 85);
+        context.fillRect(5+(165*i),5, 155, 85);
+        context.drawImage(this.getImage(), 10+(165*i), 10);
+        context.closePath();
+    }
 }
 
 /*
@@ -276,19 +292,7 @@ function draw() {
 function user_interface() {
 
     weapons.forEach(function(weapon, i) {
-        context.beginPath();
-        context.strokeStyle = "#1B1FFF";
-
-        if (weapon.isActive === true) {
-            context.fillStyle = "#ccc";
-        } else {
-            context.fillStyle = "#fff";
-        }
-
-        context.strokeRect(5+(165*i),5, 155, 85);
-        context.fillRect(5+(165*i),5, 155, 85);
-        context.drawImage(weapon.getImage(), 10+(165*i), 10);
-        context.closePath();
+        weapon.draw();
     }); // Рендерим оружие
 
     context.beginPath();
