@@ -89,6 +89,9 @@ class Enemy {
         this.pastTime = this.date.getTime();
         this.colorBody = getRandomColor(); // Цвет тела
         this.colorEye = getRandomColor(); // Цвет глаз
+        //Переменные для движения//
+        this.yinc = 0; //
+        this.lastTimeOfChangeTraectory = this.pastTime;
     }
 
     draw() {
@@ -110,16 +113,35 @@ class Enemy {
         ///////
     }
 
+    //Двигаем его
     go() {
         this.date = new Date();
+
+        // Задаем время частоты изменения траектории движения
+        if (this.date.getTime()-this.lastTimeOfChangeTraectory >= 500) {
+            this.changeTraectory();
+            this.lastTimeOfChangeTraectory = this.date.getTime();
+        }
+
+        // Задаем время частоты изменения координат
         if (this.date.getTime()-this.pastTime >= 10) {
             this.x += 2.5; // Скорость движения к игроку
-            this.y += getRandomInt(-1,1);
-            if(this.y < 200) this.y = 200;
-            if(this.y > canvas.height-200) this.y = canvas.height-200;
+            this.y += this.yinc/40;
+            if(this.y < 200) {
+                this.y = 200;
+                this.changeTraectory();
+            }
+            if(this.y > canvas.height-200) {
+                this.y = canvas.height-200;
+                this.changeTraectory();
+            }
             if(this.x > canvas.width - 300) this.x = canvas.width - 300; // Не даем уйти за границу к игроку
             this.pastTime = this.date.getTime();
         }
+    }
+
+    changeTraectory() {
+        this.yinc = getRandomInt(-80, 80);
     }
 
     // Попали ли по врагу
