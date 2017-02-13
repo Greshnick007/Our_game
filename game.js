@@ -40,7 +40,7 @@ class Weapon {
         return array;
     }
 
-    draw() {
+    draw(position) {
         context.beginPath();
         context.strokeStyle = "#1B1FFF";
 
@@ -50,9 +50,9 @@ class Weapon {
             context.fillStyle = "#fff";
         }
 
-        context.strokeRect(5+(165*i),5, 155, 85);
-        context.fillRect(5+(165*i),5, 155, 85);
-        context.drawImage(this.getImage(), 10+(165*i), 10);
+        context.strokeRect(5+(165*position),5, 155, 85);
+        context.fillRect(5+(165*position),5, 155, 85);
+        context.drawImage(this.getImage(), 10+(165*position), 10);
         context.closePath();
     }
 }
@@ -292,7 +292,7 @@ function draw() {
 function user_interface() {
 
     weapons.forEach(function(weapon, i) {
-        weapon.draw();
+        weapon.draw(i);
     }); // Рендерим оружие
 
     context.beginPath();
