@@ -79,7 +79,7 @@ class Statistic {
 
 class Enemy {
     constructor(level) {
-        this.x = -50; // Начальная координата x
+        this.x = -300; // Начальная координата x
         this.y = canvas.height/2 + getRandomInt(-200, 200);// Начальная координата y
         this.date = new Date();
         this.pastTime = this.date.getTime();
@@ -166,11 +166,18 @@ class Enemy {
 class Player {
     constructor() {
         this.stat = new Statistic();
-        this.health = 100; // Начальное здоровье
+        this.health = 10; // Начальное здоровье
         this.maxHealth = 100; // Мкс. здоровья
         this.x = canvas.width - 200; // Положение на холсте
         this.y = canvas.height/2;
         this.level = 1;
+    }
+
+    heal() {
+        this.health += this.level;
+        if(this.health > this.maxHealth) {
+            this.health = this.maxHealth;
+        }
     }
 
     addScore(arg) {
@@ -188,10 +195,10 @@ class Player {
         context.beginPath();
         // Отображаем здоровье
         context.strokeStyle = "#FFF";
-        context.font = 'bold 30px sans-serif';
+        context.font = 'bold 20px sans-serif';
         context.strokeText(this.health+'/'+this.maxHealth, this.x, this.y+200);
         // Отображение уровня
-        context.strokeText('Уровень: ' + this.level, this.x, this.y+300);
+        context.strokeText('Уровень: ' + this.level, this.x, this.y+222);
         //Голова
         context.fillStyle = "#FFFFFF";
         context.fillRect(this.x, this.y, 50, 50);
@@ -264,7 +271,8 @@ function init() {
 }
 
 function createEnemy() {
-    for (let i = 0; i < getRandomInt(1, player.level); i++) {
+    player.heal();
+    for (let i = 0; i < getRandomInt(1, 1 + player.level/2); i++) {
         enemies.push(new Enemy(player.level));
     }
     enemies.forEach(function(enemy, i){
